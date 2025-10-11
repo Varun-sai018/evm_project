@@ -1,0 +1,130 @@
+.event-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.event-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.event-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-right: var(--space-4);
+}
+
+.event-card-actions {
+  display: flex;
+  gap: var(--space-2);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.event-card:hover .event-card-actions {
+  opacity: 1;
+}
+
+.event-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.event-action-btn.edit {
+  color: var(--primary-600);
+}
+
+.event-action-btn.edit:hover {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.event-action-btn.delete {
+  color: var(--error-500);
+}
+
+.event-action-btn.delete:hover {
+  background-color: var(--error-50);
+  color: var(--error-700);
+}
+
+.event-card-description {
+  color: var(--gray-600);
+  margin-bottom: var(--space-4);
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.event-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.event-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gray-600);
+  font-size: 0.875rem;
+}
+
+.event-card-icon {
+  color: var(--primary-500);
+}
+
+.event-card-footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Dark mode */
+:root.dark-theme .event-card {
+  background-color: var(--gray-800);
+}
+
+:root.dark-theme .event-card-title {
+  color: white;
+}
+
+:root.dark-theme .event-card-description {
+  color: var(--gray-300);
+}
+
+:root.dark-theme .event-card-meta-item {
+  color: var(--gray-400);
+}
+
+:root.dark-theme .event-action-btn.edit:hover {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+:root.dark-theme .event-action-btn.delete:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}

@@ -1,0 +1,42 @@
+.event-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.event-form-title {
+  margin-bottom: var(--space-6);
+  color: var(--gray-800);
+  text-align: center;
+}
+
+.event-form .form-input.error {
+  border-color: var(--error-500);
+}
+
+.event-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+/* Dark mode */
+:root.dark-theme .event-form-title {
+  color: white;
+}
+
+:root.dark-theme .form-input {
+  background-color: var(--gray-800);
+  border-color: var(--gray-700);
+  color: white;
+}
+
+:root.dark-theme .form-input:focus {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+:root.dark-theme .form-label {
+  color: var(--gray-300);
+}

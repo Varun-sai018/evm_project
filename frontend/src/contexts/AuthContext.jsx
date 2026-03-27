@@ -20,65 +20,53 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Mock login function - in a real app, this would validate with a backend
-  const login = (email, password) => {
-    // Mock authentication logic
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // For demo, admin is admin@example.com with password "admin"
-        if (email === 'admin@example.com' && password === 'admin') {
-          const user = { 
-            id: '1', 
-            email, 
-            name: 'Admin User', 
-            role: 'admin' 
-          };
-          setCurrentUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
-          resolve(user);
-        } 
-        // Any other email/password combo is treated as a regular user
-        else if (email && password) {
-          const user = { 
-            id: '2', 
-            email, 
-            name: email.split('@')[0], 
-            role: 'user' 
-          };
-          setCurrentUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
-          resolve(user);
-        } else {
-          reject(new Error('Invalid credentials'));
-        }
-      }, 500); // simulate network delay
+  const login = async (email, password) => {
+    const response = await fetch('http://localhost:8056/api/users/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Invalid credentials');
+    }
+
+    const data = await response.json();
+    const token = data.token;
+    localStorage.setItem('token', token);
+
+    const user = { 
+      id: email, 
+      email, 
+      name: email.split('@')[0], 
+      role: email === 'admin@example.com' ? 'admin' : 'user' 
+    };
+    setCurrentUser(user);
+    localStorage.setItem('user', JSON.stringify(user));
+    return user;
   };
 
-  // Mock signup function
-  const signup = (email, password, name) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email && password) {
-          const user = { 
-            id: Math.random().toString(36).substr(2, 9), 
-            email, 
-            name: name || email.split('@')[0], 
-            role: 'user' 
-          };
-          setCurrentUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
-          resolve(user);
-        } else {
-          reject(new Error('Invalid data'));
-        }
-      }, 500); // simulate network delay
+  const signup = async (email, password, name) => {
+    const response = await fetch('http://localhost:8056/api/users/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name })
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to sign up');
+    }
+
+    // Auto-login after successful signup
+    return await login(email, password);
   };
 
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     localStorage.removeItem('booked_events');
   };
 

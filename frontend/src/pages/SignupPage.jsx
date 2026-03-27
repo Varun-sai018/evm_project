@@ -60,21 +60,6 @@ const SignupPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const url = "http://localhost:8056/api/users/signup";
-    const data = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-    };
-    await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-
     e.preventDefault();
     setError("");
 
@@ -87,7 +72,7 @@ const SignupPage = () => {
       await signup(formData.email, formData.password, formData.name);
       navigate("/user");
     } catch (err) {
-      setError("Failed to create an account. Please try again.");
+      setError(err.message || "Failed to create an account. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);

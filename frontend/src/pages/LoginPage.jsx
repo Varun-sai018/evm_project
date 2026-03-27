@@ -26,7 +26,7 @@ const LoginPage = () => {
       const user = await login(email, password);
       navigate(user.role === 'admin' ? '/admin' : '/user');
     } catch (err) {
-      setError('Failed to log in. Please check your credentials.');
+      setError(err.message || 'Failed to log in. Please check your credentials.');
       console.error(err);
     } finally {
       setLoading(false);

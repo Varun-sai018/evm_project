@@ -2,10 +2,19 @@
 
 const API_URL = 'http://localhost:8056/api/events';
 
+// Helper for auth headers
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 // Get all events
 export const getAllEvents = async () => {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, { headers: getHeaders() });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -19,7 +28,7 @@ export const getAllEvents = async () => {
 // Get a single event by ID
 export const getEventById = async (id) => {
   try {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await fetch(`${API_URL}/${id}`, { headers: getHeaders() });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -35,9 +44,7 @@ export const createEvent = async (eventData) => {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(eventData),
     });
     
@@ -57,9 +64,7 @@ export const updateEvent = async (id, eventData) => {
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(eventData),
     });
     
@@ -79,6 +84,7 @@ export const deleteEvent = async (id) => {
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
+      headers: getHeaders(),
     });
     
     if (!response.ok) {

@@ -1,100 +1,100 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Modal from './Modal';
 import { processPayment } from '../services/eventService';
-import { FiCreditCard, FiX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
-import './Modal.css';
+import './EventForm.css';
 
 const PaymentModal = ({ booking, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    cardName: '',
     cardNumber: '',
     expiry: '',
     cvv: ''
   });
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [paymentError, setPaymentError] = useState('');
+
+  const ticketPrice = booking?.event?.ticketPrice || 0;
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    if (paymentError) setPaymentError('');
   };
 
-  const handlePayment = async (e) => {
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.cardName.trim()) newErrors.cardName = 'Cardholder name is required';
+    if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s+/g, ''))) newErrors.cardNumber = 'Card number must be 16 digits';
+    if (!/^\d{2}\/\d{2}$/.test(formData.expiry)) newErrors.expiry = 'Expiry must be MM/YY';
+    if (!/^\d{3,4}$/.test(formData.cvv)) newErrors.cvv = 'CVV must be 3 or 4 digits';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
-    if (!formData.name || !formData.cardNumber || !formData.expiry || !formData.cvv) {
-      setError('Please fill in all card details.');
-      return;
-    }
-    
+    if (!validate()) return;
+
     try {
       setLoading(true);
-      // Simulate real credit card string format safely for backend
-      const details = `Card ending in ${formData.cardNumber.slice(-4)}`;
-      const confirmedBooking = await processPayment(booking.id, details);
-      onSuccess(confirmedBooking);
+      await processPayment(booking.id, ticketPrice);
+      alert('Payment processed successfully!');
+      onSuccess();
     } catch (err) {
-      setError('Payment failed. Please try again.');
-      console.error(err);
+      console.error('Payment failed:', err);
+      setPaymentError(err.message || 'Payment processing failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '400px' }}>
-        <div className="modal-header">
-          <h2>Complete Payment</h2>
-          <button className="btn-icon" onClick={onClose}><FiX /></button>
+    <Modal isOpen={true} onClose={onClose} title="Process Payment">
+      <form onSubmit={handleSubmit} className="event-form">
+        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+          <h4>Paying for: {booking?.event?.title}</h4>
+          <h3>Amount Due: ${ticketPrice.toFixed(2)}</h3>
         </div>
-        
-        <div className="modal-body">
-          <p>You are booking: <strong>{booking.event.title}</strong></p>
-          <div style={{ marginBottom: '1rem', padding: '1rem', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
-            <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Total: ${booking.amount || booking.event.ticketPrice || 0}</span>
+
+        {paymentError && <div className="form-error" style={{ marginBottom: '15px' }}>{paymentError}</div>}
+
+        <div className="form-group">
+          <label className="form-label">Cardholder Name</label>
+          <input type="text" name="cardName" className={`form-input ${errors.cardName ? 'error' : ''}`} value={formData.cardName} onChange={handleChange} placeholder="John Doe" />
+          {errors.cardName && <p className="form-error">{errors.cardName}</p>}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Card Number</label>
+          <input type="text" name="cardNumber" className={`form-input ${errors.cardNumber ? 'error' : ''}`} value={formData.cardNumber} onChange={handleChange} placeholder="1234 5678 9101 1121" maxLength="19" />
+          {errors.cardNumber && <p className="form-error">{errors.cardNumber}</p>}
+        </div>
+
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <div className="form-group" style={{ flex: 1 }}>
+            <label className="form-label">Expiry (MM/YY)</label>
+            <input type="text" name="expiry" className={`form-input ${errors.expiry ? 'error' : ''}`} value={formData.expiry} onChange={handleChange} placeholder="12/26" maxLength="5" />
+            {errors.expiry && <p className="form-error">{errors.expiry}</p>}
           </div>
 
-          {error && (
-            <div className="alert alert-danger" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#d32f2f', marginBottom: '1rem' }}>
-              <FiAlertCircle /> <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handlePayment}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name on Card</label>
-              <input type="text" name="name" className="form-input" value={formData.name} onChange={handleChange} placeholder="John Doe" required />
-            </div>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem' }}>Card Number</label>
-              <div style={{ position: 'relative' }}>
-                <FiCreditCard style={{ position: 'absolute', top: '12px', left: '10px', color: '#6c757d' }} />
-                <input type="text" name="cardNumber" className="form-input" value={formData.cardNumber} onChange={handleChange} placeholder="0000 0000 0000 0000" style={{ paddingLeft: '35px' }} required minLength={16} maxLength={19} />
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Expiry</label>
-                <input type="text" name="expiry" className="form-input" value={formData.expiry} onChange={handleChange} placeholder="MM/YY" required maxLength={5} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>CVV</label>
-                <input type="password" name="cvv" className="form-input" value={formData.cvv} onChange={handleChange} placeholder="123" required minLength={3} maxLength={4} />
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading} style={{ width: '100%' }}>
-              {loading ? 'Processing...' : `Pay $${booking.amount || booking.event.ticketPrice || 0}`}
-              {!loading && <FiCheckCircle style={{ marginLeft: '8px' }} />}
-            </button>
-          </form>
+          <div className="form-group" style={{ flex: 1 }}>
+            <label className="form-label">CVV</label>
+            <input type="text" name="cvv" className={`form-input ${errors.cvv ? 'error' : ''}`} value={formData.cvv} onChange={handleChange} placeholder="123" maxLength="4" />
+            {errors.cvv && <p className="form-error">{errors.cvv}</p>}
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div className="event-form-actions">
+          <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>Cancel</button>
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? 'Processing...' : `Pay $${ticketPrice.toFixed(2)}`}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

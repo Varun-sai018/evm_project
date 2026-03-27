@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -19,26 +20,30 @@ public class PaymentController {
     @PostMapping("/process")
     public ResponseEntity<?> processPayment(@RequestBody Map<String, Object> payload) {
         try {
-            // Using Object and casting safely
-            Object bookingIdObj = payload.get("bookingId");
-            Long bookingId = null;
-            if (bookingIdObj instanceof Number) {
-                bookingId = ((Number) bookingIdObj).longValue();
-            } else if (bookingIdObj instanceof String) {
-                bookingId = Long.parseLong((String) bookingIdObj);
-            }
+            Long bookingId = Long.valueOf(payload.get("bookingId").toString());
+            Double amount = Double.valueOf(payload.get("amount").toString());
             
-            String paymentDetails = (String) payload.get("paymentDetails");
+            Booking updatedBooking = paymentService.processPayment(bookingId, amount);
             
-            if (bookingId == null || paymentDetails == null) {
-                return ResponseEntity.badRequest().body("Invalid payment payload");
-            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Payment processed successfully");
+            response.put("bookingId", updatedBooking.getId());
+            response.put("status", updatedBooking.getStatus());
+            response.put("isPaid", updatedBooking.getIsPaid());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
-            Booking confirmedBooking = paymentService.processPayment(bookingId, paymentDetails);
-            return ResponseEntity.ok(confirmedBooking);
-            
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+    @GetMapping("/booking/{bookingId}")
+    public ResponseEntity<?> getPaymentStatus(@PathVariable Long bookingId) {
+        try {
+            Map<String, Object> status = paymentService.getPaymentStatus(bookingId);
+            return ResponseEntity.ok(status);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }

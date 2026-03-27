@@ -20,6 +20,7 @@ public class Event {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Double ticketPrice;
+    private String location;
 	public Long getId() {
 		return id;
 	}
@@ -55,5 +56,11 @@ public class Event {
 	}
 	public void setTicketPrice(Double ticketPrice) {
 		this.ticketPrice = ticketPrice;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
 	}
 }

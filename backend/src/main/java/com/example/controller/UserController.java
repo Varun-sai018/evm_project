@@ -54,9 +54,10 @@ public class UserController {
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
             String token = jwtUtil.generateToken(user.getEmail());
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("message", "Login successful!");
+            response.put("user", new com.example.dto.UserDTO(existingUser.get()));
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(401).body("Invalid email or password");

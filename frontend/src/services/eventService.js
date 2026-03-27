@@ -14,7 +14,7 @@ const getHeaders = () => {
 // Get all events
 export const getAllEvents = async () => {
   try {
-    const response = await fetch(`${API_URL}/events`, { headers: getHeaders() });
+    const response = await fetch(API_URL, { headers: getHeaders() });
     if (!response.ok) throw new Error('Failed to fetch events');
     const data = await response.json();
     return data.content !== undefined ? data.content : data;

@@ -6,7 +6,8 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
     title: '',
     description: '',
     startTime: '',
-    endTime: ''
+    endTime: '',
+    ticketPrice: 0
   });
   
   const [errors, setErrors] = useState({});
@@ -24,7 +25,8 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
         title: event.title || '',
         description: event.description || '',
         startTime: event.startTime ? formatDateForInput(event.startTime) : '',
-        endTime: event.endTime ? formatDateForInput(event.endTime) : ''
+        endTime: event.endTime ? formatDateForInput(event.endTime) : '',
+        ticketPrice: event.ticketPrice !== undefined ? event.ticketPrice : 0
       });
     }
   }, [event]);
@@ -64,6 +66,9 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
       newErrors.endTime = 'End time is required';
     } else if (formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime)) {
       newErrors.endTime = 'End time must be after start time';
+    }
+    if (formData.ticketPrice === '' || Number(formData.ticketPrice) < 0) {
+      newErrors.ticketPrice = 'Valid ticket price is required';
     }
     
     setErrors(newErrors);
@@ -133,6 +138,21 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
           onChange={handleChange}
         />
         {errors.endTime && <p className="form-error">{errors.endTime}</p>}
+      </div>
+      
+      <div className="form-group">
+        <label htmlFor="ticketPrice" className="form-label">Ticket Price ($)</label>
+        <input
+          type="number"
+          id="ticketPrice"
+          name="ticketPrice"
+          min="0"
+          step="0.01"
+          className={`form-input ${errors.ticketPrice ? 'error' : ''}`}
+          value={formData.ticketPrice}
+          onChange={handleChange}
+        />
+        {errors.ticketPrice && <p className="form-error">{errors.ticketPrice}</p>}
       </div>
       
       <div className="event-form-actions">

@@ -36,12 +36,9 @@ export const AuthProvider = ({ children }) => {
     const token = data.token;
     localStorage.setItem('token', token);
 
-    const user = { 
-      id: email, 
-      email, 
-      name: email.split('@')[0], 
-      role: email === 'admin@example.com' ? 'admin' : 'user' 
-    };
+    const user = data.user; 
+    user.role = user.email === 'admin@example.com' ? 'admin' : 'user';
+
     setCurrentUser(user);
     localStorage.setItem('user', JSON.stringify(user));
     return user;

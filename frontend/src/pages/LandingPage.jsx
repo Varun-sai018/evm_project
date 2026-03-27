@@ -1,11 +1,35 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FiCalendar, FiUsers, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { FiCalendar, FiUsers, FiCheckCircle, FiClock, FiLoader, FiAlertCircle } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { getAllEvents } from '../services/eventService';
+import EventCard from '../components/EventCard';
 import './LandingPage.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchLatestEvents = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllEvents();
+        // Since it's paginated or array, map safely
+        const eventsList = data.content ? data.content : (Array.isArray(data) ? data : []);
+        setEvents(eventsList.slice(0, 3));
+      } catch (err) {
+        setError('Failed to load upcoming events.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLatestEvents();
+  }, []);
 
   return (
     <div className="landing-page">
@@ -41,6 +65,29 @@ const LandingPage = () => {
             <img src="https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
                  alt="Event Management" />
           </div>
+        </div>
+      </section>
+
+      {/* Upcoming Events Section */}
+      <section className="upcoming-events" style={{ padding: '4rem 0', background: 'var(--surface-color)' }}>
+        <div className="container">
+          <h2 className="section-title">Upcoming Events</h2>
+          {loading && <div style={{ textAlign: 'center' }}><FiLoader className="spinner" /> Loading events...</div>}
+          {error && <div style={{ textAlign: 'center', color: 'var(--error-color)' }}><FiAlertCircle /> {error}</div>}
+          {!loading && !error && events.length > 0 && (
+            <div className="events-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              {events.map((event) => (
+                <EventCard 
+                   key={event.id} 
+                   event={event} 
+                   onBook={() => navigate(currentUser ? '/user' : '/login')} 
+                />
+              ))}
+            </div>
+          )}
+          {!loading && !error && events.length === 0 && (
+            <p style={{ textAlign: 'center' }}>No upcoming events currently scheduled.</p>
+          )}
         </div>
       </section>
 

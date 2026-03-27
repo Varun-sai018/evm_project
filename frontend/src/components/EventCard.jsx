@@ -6,10 +6,12 @@ const EventCard = ({
   event, 
   isAdmin = false, 
   isBooked = false,
+  bookingStatus = null,
   onEdit,
   onDelete,
   onBook,
-  onCancelBooking
+  onCancelBooking,
+  onPayNow
 }) => {
   const formatDate = (dateString) => {
     try {
@@ -70,26 +72,39 @@ const EventCard = ({
       {!isAdmin && (
         <div className="event-card-footer">
           {isBooked && onCancelBooking ? (
-            <button 
-              onClick={() => onCancelBooking(event.id)} 
-              className="btn btn-danger btn-sm"
-            >
-              Cancel Booking
-            </button>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '8px', width: '100%'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <span className={`badge ${bookingStatus === 'PENDING' ? 'badge-warning' : 'badge-success'}`} style={{
+                  padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', 
+                  backgroundColor: bookingStatus === 'PENDING' ? '#fff3cd' : '#d4edda',
+                  color: bookingStatus === 'PENDING' ? '#856404' : '#155724'
+                }}>
+                  {bookingStatus || 'CONFIRMED'}
+                </span>
+                <button onClick={() => onCancelBooking(event.id)} className="btn btn-danger btn-sm">
+                  Cancel
+                </button>
+              </div>
+              {bookingStatus === 'PENDING' && onPayNow && (
+                <button onClick={() => onPayNow()} className="btn btn-primary btn-sm" style={{width: '100%'}}>
+                  Pay Now
+                </button>
+              )}
+            </div>
           ) : isBooked ? (
             <button 
               className="btn btn-secondary btn-sm"
               disabled
-              style={{ opacity: 0.6, cursor: 'not-allowed' }}
+              style={{ opacity: 0.6, cursor: 'not-allowed', width: '100%' }}
             >
-              Already Booked
+              {bookingStatus === 'PENDING' ? 'Pending Payment' : 'Already Booked'}
             </button>
           ) : (
             <button 
               onClick={() => onBook(event)} 
               className="btn btn-primary btn-sm"
             >
-              Book Event
+              Book Event {event.ticketPrice > 0 ? `($${event.ticketPrice})` : ''}
             </button>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiLoader, FiAlertCircle, FiCalendar } from 'react-icons/fi';
 import EventCard from '../components/EventCard';
+import PaymentModal from '../components/PaymentModal';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllEvents, getUserBookedEvents, bookEvent, cancelBooking } from '../services/eventService';
 import './Dashboard.css';
@@ -12,6 +13,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('available');
+  const [selectedBookingForPayment, setSelectedBookingForPayment] = useState(null);
 
   // Fetch events and booked events on component mount
   useEffect(() => {
@@ -43,9 +45,10 @@ const UserDashboard = () => {
   // Handler for booking an event
   const handleBookEvent = async (event) => {
     try {
-      await bookEvent(currentUser.id, event.id);
-      const updatedBookings = await getUserBookedEvents(currentUser.id);
-      setBookedEvents(updatedBookings);
+      const newBooking = await bookEvent(currentUser.id, event.id);
+      setSelectedBookingForPayment(newBooking);
+      // We don't refresh booked list here to let them finish payment first,
+      // or refresh happens after modal is closed.
     } catch(err) {
       console.error(err);
     }
@@ -145,10 +148,26 @@ const UserDashboard = () => {
                 key={booking.event.id}
                 event={booking.event}
                 isBooked={true}
+                bookingStatus={booking.status}
                 onCancelBooking={() => handleCancelBooking(booking.id)}
+                onPayNow={booking.status === 'PENDING' ? () => setSelectedBookingForPayment(booking) : undefined}
               />
             ))}
           </div>
+        )}
+
+        {selectedBookingForPayment && (
+          <PaymentModal
+            booking={selectedBookingForPayment}
+            onClose={() => {
+              setSelectedBookingForPayment(null);
+              getUserBookedEvents(currentUser.id).then(setBookedEvents).catch(console.error);
+            }}
+            onSuccess={(confirmedBooking) => {
+              setSelectedBookingForPayment(null);
+              getUserBookedEvents(currentUser.id).then(setBookedEvents).catch(console.error);
+            }}
+          />
         )}
       </div>
     </div>

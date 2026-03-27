@@ -139,3 +139,18 @@ export const cancelBooking = async (bookingId) => {
     throw error;
   }
 };
+
+export const processPayment = async (bookingId, paymentDetails) => {
+  try {
+    const response = await fetch('http://localhost:8056/api/payments/process', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ bookingId, paymentDetails })
+    });
+    if (!response.ok) throw new Error('Failed to process payment');
+    return await response.json();
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    throw error;
+  }
+};

@@ -30,11 +30,14 @@ public class BookingService {
         Optional<Event> eventOpt = eventRepository.findById(eventId);
 
         if (userOpt.isPresent() && eventOpt.isPresent()) {
+            Event event = eventOpt.get();
             Booking booking = new Booking();
             booking.setUser(userOpt.get());
-            booking.setEvent(eventOpt.get());
+            booking.setEvent(event);
             booking.setBookedAt(LocalDateTime.now());
-            booking.setStatus("CONFIRMED");
+            booking.setStatus("PENDING");
+            booking.setAmount(event.getTicketPrice() != null ? event.getTicketPrice() : 0.0);
+            booking.setIsPaid(false);
             return bookingRepository.save(booking);
         }
         throw new RuntimeException("User or Event not found");

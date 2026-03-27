@@ -19,6 +19,7 @@ public class Event {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Double ticketPrice;
 	public Long getId() {
 		return id;
 	}
@@ -48,5 +49,11 @@ public class Event {
 	}
 	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
+	}
+	public Double getTicketPrice() {
+		return ticketPrice;
+	}
+	public void setTicketPrice(Double ticketPrice) {
+		this.ticketPrice = ticketPrice;
 	}
 }

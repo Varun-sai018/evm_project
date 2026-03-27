@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
+import AnalyticsPage from './pages/AnalyticsPage';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/analytics/:eventId" element={<ProtectedRoute role="admin"><AnalyticsPage /></ProtectedRoute>} />
             <Route path="/user" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
           </Routes>
         </div>

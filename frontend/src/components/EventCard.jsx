@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { FiCalendar, FiClock, FiEdit, FiTrash, FiList } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiEdit, FiTrash, FiList, FiPieChart } from 'react-icons/fi';
 import EventSchedule from './EventSchedule';
 import './EventCard.css';
 
@@ -13,7 +13,8 @@ const EventCard = ({
   onBook,
   onCancelBooking,
   onPayNow,
-  onManageSchedule
+  onManageSchedule,
+  onAnalytics
 }) => {
   const formatDate = (dateString) => {
     try {
@@ -40,6 +41,14 @@ const EventCard = ({
         
         {isAdmin && (
           <div className="event-card-actions">
+            <button 
+              onClick={() => onAnalytics && onAnalytics(event.id)} 
+              className="btn-icon event-action-btn"
+              title="View Analytics"
+              style={{ color: '#28a745' }}
+            >
+              <FiPieChart />
+            </button>
             <button 
               onClick={() => onManageSchedule && onManageSchedule(event)} 
               className="btn-icon event-action-btn"

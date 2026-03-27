@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,8 +45,11 @@ public class BookingService {
     }
 
     public void cancelBooking(Long bookingId) {
-        if (bookingRepository.existsById(bookingId)) {
-            bookingRepository.deleteById(bookingId);
+        Optional<Booking> bookingOpt = bookingRepository.findById(bookingId);
+        if (bookingOpt.isPresent()) {
+            Booking booking = bookingOpt.get();
+            booking.setStatus("CANCELLED");
+            bookingRepository.save(booking);
         } else {
             throw new RuntimeException("Booking not found");
         }
@@ -54,7 +58,9 @@ public class BookingService {
     public List<Booking> getUserBookings(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
-            return bookingRepository.findByUser(userOpt.get());
+            return bookingRepository.findByUser(userOpt.get()).stream()
+                    .filter(b -> !"CANCELLED".equals(b.getStatus()))
+                    .collect(Collectors.toList());
         }
         throw new RuntimeException("User not found");
     }
@@ -62,7 +68,9 @@ public class BookingService {
     public List<Booking> getEventAttendees(Long eventId) {
         Optional<Event> eventOpt = eventRepository.findById(eventId);
         if (eventOpt.isPresent()) {
-            return bookingRepository.findByEvent(eventOpt.get());
+            return bookingRepository.findByEvent(eventOpt.get()).stream()
+                    .filter(b -> !"CANCELLED".equals(b.getStatus()))
+                    .collect(Collectors.toList());
         }
         throw new RuntimeException("Event not found");
     }

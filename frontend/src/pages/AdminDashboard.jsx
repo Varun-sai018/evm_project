@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiPlus, FiLoader, FiAlertCircle } from 'react-icons/fi';
 import EventCard from '../components/EventCard';
 import Modal from '../components/Modal';
@@ -8,6 +9,7 @@ import { getAllEvents, createEvent, updateEvent, deleteEvent } from '../services
 import './Dashboard.css';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -137,6 +139,7 @@ const AdminDashboard = () => {
                 onEdit={handleEditEvent}
                 onDelete={handleDeleteClick}
                 onManageSchedule={(e) => setScheduleEvent(e)}
+                onAnalytics={(eventId) => navigate(`/admin/analytics/${eventId}`)}
               />
             ))}
           </div>

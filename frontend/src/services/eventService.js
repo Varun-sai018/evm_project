@@ -154,3 +154,14 @@ export const processPayment = async (bookingId, paymentDetails) => {
     throw error;
   }
 };
+
+export const getEventAnalytics = async (eventId) => {
+  try {
+    const response = await fetch(`http://localhost:8056/api/analytics/event/${eventId}`, { headers: getHeaders() });
+    if (!response.ok) throw new Error('Failed to fetch analytics');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    throw error;
+  }
+};

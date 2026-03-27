@@ -5,7 +5,7 @@ import EventCard from '../components/EventCard';
 import Modal from '../components/Modal';
 import EventForm from '../components/EventForm';
 import AdminScheduleModal from '../components/AdminScheduleModal';
-import { getAllEvents, createEvent, updateEvent, deleteEvent } from '../services/eventService';
+import { getAllEvents, createEvent, updateEvent, deleteEvent, getDashboardSummary } from '../services/eventService';
 import './Dashboard.css';
 
 const AdminDashboard = () => {
@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [currentEvent, setCurrentEvent] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [scheduleEvent, setScheduleEvent] = useState(null);
+  const [summary, setSummary] = useState(null);
 
   // Fetch events on component mount
   useEffect(() => {
@@ -29,6 +30,12 @@ const AdminDashboard = () => {
       setError('');
       const data = await getAllEvents();
       setEvents(data);
+      try {
+        const sumData = await getDashboardSummary();
+        setSummary(sumData);
+      } catch (err) {
+        console.error('Failed sum data load', err);
+      }
     } catch (err) {
       console.error('Error fetching events:', err);
       setError('Failed to load events. Please try again later.');
@@ -103,6 +110,23 @@ const AdminDashboard = () => {
             Add Event
           </button>
         </div>
+
+        {summary && (
+          <div className="analytics-summary" style={{ display: 'flex', gap: '20px', marginBottom: '30px', padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ color: 'var(--text-light)', marginBottom: '5px' }}>Total Events</h4>
+              <h2 style={{ fontSize: '2rem' }}>{summary.totalEvents}</h2>
+            </div>
+            <div style={{ flex: 1, borderLeft: '1px solid var(--border-color)', paddingLeft: '20px' }}>
+              <h4 style={{ color: 'var(--text-light)', marginBottom: '5px' }}>Total Bookings</h4>
+              <h2 style={{ fontSize: '2rem' }}>{summary.totalBookings}</h2>
+            </div>
+            <div style={{ flex: 1, borderLeft: '1px solid var(--border-color)', paddingLeft: '20px' }}>
+              <h4 style={{ color: 'var(--text-light)', marginBottom: '5px' }}>Total Revenue</h4>
+              <h2 style={{ fontSize: '2rem', color: 'var(--success-color)' }}>₹{summary.totalRevenue.toFixed(2)}</h2>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="dashboard-error">

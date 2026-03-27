@@ -156,11 +156,28 @@ export const processPayment = async (bookingId, amount) => {
 
 export const getEventAnalytics = async (eventId) => {
   try {
-    const response = await fetch(`http://localhost:8056/api/analytics/event/${eventId}`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Failed to fetch analytics');
+    const response = await fetch(`${API_URL}/analytics/event/${eventId}`, {
+      headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch event analytics');
     return await response.json();
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    console.error(`Error fetching analytics for event ${eventId}:`, error);
     throw error;
   }
 };
+
+export const getDashboardSummary = async () => {
+  try {
+    const response = await fetch(`${API_URL}/analytics/dashboard`, {
+      headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch dashboard summary');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching dashboard summary:', error);
+    throw error;
+  }
+};
+
+// Removed redundant getEventAnalytics definition

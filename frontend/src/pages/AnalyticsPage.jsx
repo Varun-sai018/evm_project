@@ -1,87 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getEventAnalytics, getEventById } from '../services/eventService';
-import { FiArrowLeft, FiPieChart, FiDollarSign, FiUsers, FiXCircle } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FiArrowLeft, FiLoader, FiAlertCircle, FiUsers, FiDollarSign, FiCheckCircle, FiXCircle, FiClock } from 'react-icons/fi';
+import { getEventAnalytics } from '../services/eventService';
 import './Dashboard.css';
 
 const AnalyticsPage = () => {
   const { eventId } = useParams();
+  const navigate = useNavigate();
   const [analytics, setAnalytics] = useState(null);
-  const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAnalytics = async () => {
       try {
-        const [eventData, analyticsData] = await Promise.all([
-          getEventById(eventId),
-          getEventAnalytics(eventId)
-        ]);
-        setEvent(eventData);
-        setAnalytics(analyticsData);
+        const data = await getEventAnalytics(eventId);
+        setAnalytics(data);
       } catch (err) {
-        console.error(err);
+        setError('Failed to load analytics data.');
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchAnalytics();
   }, [eventId]);
 
-  if (loading) return <div className="container" style={{padding: '40px'}}>Loading Analytics...</div>;
-  if (!analytics || !event) return <div className="container" style={{padding: '40px'}}>Failed to load data.</div>;
+  if (loading) return <div className="dashboard-loading"><FiLoader className="spinner" /></div>;
+  if (error) return <div className="dashboard-error"><FiAlertCircle /> <span>{error}</span></div>;
+  if (!analytics) return null;
 
-  const maxAttendees = Math.max(analytics.totalBookings, 10);
-  const maxRevenue = Math.max(analytics.totalRevenue, 100);
-
-  const Bar = ({ label, value, max, color, prefix = '', suffix = '' }) => (
-    <div style={{ marginBottom: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontWeight: 'bold' }}>
-        <span>{label}</span>
-        <span>{prefix}{value}{suffix}</span>
-      </div>
-      <div style={{ height: '30px', background: '#e9ecef', borderRadius: '6px', overflow: 'hidden' }}>
-        <div style={{ width: `${Math.min(100, (value/max)*100)}%`, height: '100%', background: color, transition: 'width 1s' }}></div>
-      </div>
-    </div>
-  );
+  const total = analytics.totalBookings || 1; // avoid divide by zero
+  const confWidth = `${(analytics.confirmedBookings / total) * 100}%`;
+  const pendWidth = `${(analytics.pendingBookings / total) * 100}%`;
+  const cancWidth = `${(analytics.cancelledBookings / total) * 100}%`;
 
   return (
-    <div className="container" style={{ padding: '40px 20px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <Link to="/admin" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-          <FiArrowLeft /> Back to Dashboard
-        </Link>
-      </div>
+    <div className="dashboard">
+      <div className="container">
+        <div className="dashboard-header" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <button className="btn btn-outline" onClick={() => navigate('/admin')}>
+            <FiArrowLeft /> Back
+          </button>
+          <h1 className="dashboard-title">Analytics: {analytics.eventTitle}</h1>
+        </div>
 
-      <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px', color: '#333' }}>
-          <FiPieChart /> Analytics for: {event.title}
-        </h2>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-          <div style={{ padding: '20px', background: '#e3f2fd', borderRadius: '8px', textAlign: 'center' }}>
-            <FiUsers size={32} color="#1976d2" style={{ marginBottom: '10px' }} />
-            <h3 style={{ margin: 0, fontSize: '2rem', color: '#1976d2' }}>{analytics.totalBookings}</h3>
-            <p style={{ margin: '5px 0 0 0', color: '#555' }}>Total Bookings</p>
+        <div className="analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+          <div className="stat-card" style={{ padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <FiUsers size={24} style={{ color: 'var(--primary-color)' }} />
+            <h3>{analytics.totalBookings}</h3>
+            <p style={{ color: 'var(--text-light)' }}>Total Bookings</p>
           </div>
-          <div style={{ padding: '20px', background: '#e8f5e9', borderRadius: '8px', textAlign: 'center' }}>
-            <FiDollarSign size={32} color="#2e7d32" style={{ marginBottom: '10px' }} />
-            <h3 style={{ margin: 0, fontSize: '2rem', color: '#2e7d32' }}>${analytics.totalRevenue}</h3>
-            <p style={{ margin: '5px 0 0 0', color: '#555' }}>Total Revenue</p>
+          <div className="stat-card" style={{ padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <FiCheckCircle size={24} style={{ color: 'var(--success-color)' }} />
+            <h3>{analytics.confirmedBookings}</h3>
+            <p style={{ color: 'var(--text-light)' }}>Confirmed</p>
           </div>
-          <div style={{ padding: '20px', background: '#ffebee', borderRadius: '8px', textAlign: 'center' }}>
-            <FiXCircle size={32} color="#c62828" style={{ marginBottom: '10px' }} />
-            <h3 style={{ margin: 0, fontSize: '2rem', color: '#c62828' }}>{analytics.cancellationCount}</h3>
-            <p style={{ margin: '5px 0 0 0', color: '#555' }}>Cancellations</p>
+          <div className="stat-card" style={{ padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <FiClock size={24} style={{ color: 'var(--warning-color)' }} />
+            <h3>{analytics.pendingBookings}</h3>
+            <p style={{ color: 'var(--text-light)' }}>Pending</p>
+          </div>
+          <div className="stat-card" style={{ padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <FiXCircle size={24} style={{ color: 'var(--danger-color)' }} />
+            <h3>{analytics.cancelledBookings}</h3>
+            <p style={{ color: 'var(--text-light)' }}>Cancelled</p>
+          </div>
+          <div className="stat-card" style={{ padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <FiDollarSign size={24} style={{ color: 'var(--success-color)' }} />
+            <h3>₹{analytics.totalRevenue.toFixed(2)}</h3>
+            <p style={{ color: 'var(--text-light)' }}>Total Revenue</p>
+          </div>
+          <div className="stat-card" style={{ padding: '20px', background: 'var(--card-bg)', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+            <FiUsers size={24} style={{ color: '#8b5cf6' }} />
+            <h3>{analytics.attendanceRate}%</h3>
+            <p style={{ color: 'var(--text-light)' }}>Attendance Rate</p>
           </div>
         </div>
 
-        <h3 style={{ marginBottom: '20px' }}>Visual Breakdown</h3>
-        <Bar label="Bookings Volume" value={analytics.totalBookings} max={maxAttendees} color="#4dabf7" />
-        <Bar label="Total Revenue Collected" value={analytics.totalRevenue} max={maxRevenue} color="#69db7c" prefix="$" />
-        <Bar label="Attendance Rate" value={Math.round(analytics.attendanceRate)} max={100} color="#ffd43b" suffix="%" />
-        <Bar label="Lost from Cancellations" value={analytics.cancellationCount} max={analytics.totalBookings + analytics.cancellationCount || 10} color="#ff8787" />
+        <div className="chart-container" style={{ background: 'var(--card-bg)', padding: '30px', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
+          <h3>Bookings Breakdown</h3>
+          <div style={{ height: '30px', width: '100%', display: 'flex', borderRadius: '15px', overflow: 'hidden', marginTop: '20px' }}>
+            <div style={{ width: confWidth, background: 'var(--success-color)' }} title={`Confirmed: ${analytics.confirmedBookings}`}></div>
+            <div style={{ width: pendWidth, background: 'var(--warning-color)' }} title={`Pending: ${analytics.pendingBookings}`}></div>
+            <div style={{ width: cancWidth, background: 'var(--danger-color)' }} title={`Cancelled: ${analytics.cancelledBookings}`}></div>
+          </div>
+          <div style={{ display: 'flex', gap: '20px', marginTop: '15px', justifyContent: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--success-color)' }}></div> Confirmed</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--warning-color)' }}></div> Pending</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--danger-color)' }}></div> Cancelled</span>
+          </div>
+        </div>
       </div>
     </div>
   );

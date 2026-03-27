@@ -3,6 +3,7 @@ import { FiPlus, FiLoader, FiAlertCircle } from 'react-icons/fi';
 import EventCard from '../components/EventCard';
 import Modal from '../components/Modal';
 import EventForm from '../components/EventForm';
+import AdminScheduleModal from '../components/AdminScheduleModal';
 import { getAllEvents, createEvent, updateEvent, deleteEvent } from '../services/eventService';
 import './Dashboard.css';
 
@@ -13,6 +14,7 @@ const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [scheduleEvent, setScheduleEvent] = useState(null);
 
   // Fetch events on component mount
   useEffect(() => {
@@ -134,6 +136,7 @@ const AdminDashboard = () => {
                 isAdmin={true}
                 onEdit={handleEditEvent}
                 onDelete={handleDeleteClick}
+                onManageSchedule={(e) => setScheduleEvent(e)}
               />
             ))}
           </div>
@@ -177,6 +180,13 @@ const AdminDashboard = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Admin Schedule Modal */}
+      <AdminScheduleModal 
+        isOpen={!!scheduleEvent} 
+        onClose={() => setScheduleEvent(null)} 
+        event={scheduleEvent} 
+      />
     </div>
   );
 };

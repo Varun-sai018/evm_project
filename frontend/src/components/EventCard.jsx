@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import { FiCalendar, FiClock, FiEdit, FiTrash } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiEdit, FiTrash, FiList } from 'react-icons/fi';
+import EventSchedule from './EventSchedule';
 import './EventCard.css';
 
 const EventCard = ({ 
@@ -11,7 +12,8 @@ const EventCard = ({
   onDelete,
   onBook,
   onCancelBooking,
-  onPayNow
+  onPayNow,
+  onManageSchedule
 }) => {
   const formatDate = (dateString) => {
     try {
@@ -38,6 +40,14 @@ const EventCard = ({
         
         {isAdmin && (
           <div className="event-card-actions">
+            <button 
+              onClick={() => onManageSchedule && onManageSchedule(event)} 
+              className="btn-icon event-action-btn"
+              title="Manage Schedule"
+              style={{ color: '#0056b3' }}
+            >
+              <FiList />
+            </button>
             <button 
               onClick={() => onEdit(event)} 
               className="btn-icon event-action-btn edit"
@@ -68,6 +78,8 @@ const EventCard = ({
           <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
         </div>
       </div>
+      
+      <EventSchedule eventId={event.id} />
       
       {!isAdmin && (
         <div className="event-card-footer">

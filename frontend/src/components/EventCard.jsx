@@ -69,12 +69,20 @@ const EventCard = ({
       
       {!isAdmin && (
         <div className="event-card-footer">
-          {isBooked ? (
+          {isBooked && onCancelBooking ? (
             <button 
               onClick={() => onCancelBooking(event.id)} 
               className="btn btn-danger btn-sm"
             >
               Cancel Booking
+            </button>
+          ) : isBooked ? (
+            <button 
+              className="btn btn-secondary btn-sm"
+              disabled
+              style={{ opacity: 0.6, cursor: 'not-allowed' }}
+            >
+              Already Booked
             </button>
           ) : (
             <button 

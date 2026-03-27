@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { FiLoader, FiAlertCircle, FiCalendar } from 'react-icons/fi';
 import EventCard from '../components/EventCard';
+import { useAuth } from '../contexts/AuthContext';
 import { getAllEvents, getUserBookedEvents, bookEvent, cancelBooking } from '../services/eventService';
 import './Dashboard.css';
 
 const UserDashboard = () => {
+  const { currentUser } = useAuth();
   const [events, setEvents] = useState([]);
   const [bookedEvents, setBookedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,9 +24,11 @@ const UserDashboard = () => {
         const eventsData = await getAllEvents();
         setEvents(eventsData);
         
-        // Get booked events from localStorage
-        const userBookedEvents = getUserBookedEvents();
-        setBookedEvents(userBookedEvents);
+        // Get booked events from API
+        if (currentUser) {
+          const userBookings = await getUserBookedEvents(currentUser.id);
+          setBookedEvents(userBookings);
+        }
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load events. Please try again later.');
@@ -34,22 +38,32 @@ const UserDashboard = () => {
     };
     
     fetchData();
-  }, []);
+  }, [currentUser]);
 
   // Handler for booking an event
-  const handleBookEvent = (event) => {
-    const updatedBookedEvents = bookEvent(event);
-    setBookedEvents(updatedBookedEvents);
+  const handleBookEvent = async (event) => {
+    try {
+      await bookEvent(currentUser.id, event.id);
+      const updatedBookings = await getUserBookedEvents(currentUser.id);
+      setBookedEvents(updatedBookings);
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   // Handler for canceling a booking
-  const handleCancelBooking = (eventId) => {
-    const updatedBookedEvents = cancelBooking(eventId);
-    setBookedEvents(updatedBookedEvents);
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      await cancelBooking(bookingId);
+      const updatedBookings = await getUserBookedEvents(currentUser.id);
+      setBookedEvents(updatedBookings);
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   // Get IDs of booked events for easy checking
-  const bookedEventIds = bookedEvents.map(event => event.id);
+  const bookedEventIds = bookedEvents.map(booking => booking.event.id);
 
   return (
     <div className="dashboard user-dashboard">
@@ -119,7 +133,6 @@ const UserDashboard = () => {
                 event={event}
                 isBooked={bookedEventIds.includes(event.id)}
                 onBook={handleBookEvent}
-                onCancelBooking={handleCancelBooking}
               />
             ))}
           </div>
@@ -127,12 +140,12 @@ const UserDashboard = () => {
 
         {activeTab === 'booked' && bookedEvents.length > 0 && (
           <div className="events-grid">
-            {bookedEvents.map(event => (
+            {bookedEvents.map(booking => (
               <EventCard
-                key={event.id}
-                event={event}
+                key={booking.event.id}
+                event={booking.event}
                 isBooked={true}
-                onCancelBooking={handleCancelBooking}
+                onCancelBooking={() => handleCancelBooking(booking.id)}
               />
             ))}
           </div>

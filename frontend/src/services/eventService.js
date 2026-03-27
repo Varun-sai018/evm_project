@@ -98,28 +98,44 @@ export const deleteEvent = async (id) => {
   }
 };
 
-// Mock functions for user event booking
-export const getUserBookedEvents = () => {
-  const bookedEvents = localStorage.getItem('booked_events');
-  return bookedEvents ? JSON.parse(bookedEvents) : [];
-};
+const BOOKING_API_URL = 'http://localhost:8056/api/bookings';
 
-export const bookEvent = (event) => {
-  const bookedEvents = getUserBookedEvents();
-  
-  // Check if event is already booked
-  if (!bookedEvents.some(e => e.id === event.id)) {
-    const updatedBookings = [...bookedEvents, event];
-    localStorage.setItem('booked_events', JSON.stringify(updatedBookings));
-    return updatedBookings;
+export const getUserBookedEvents = async (userId) => {
+  try {
+    const response = await fetch(`${BOOKING_API_URL}/user/${userId}`, { headers: getHeaders() });
+    if (!response.ok) throw new Error('Failed to fetch booked events');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching booked events:', error);
+    return [];
   }
-  
-  return bookedEvents;
 };
 
-export const cancelBooking = (eventId) => {
-  const bookedEvents = getUserBookedEvents();
-  const updatedBookings = bookedEvents.filter(event => event.id !== eventId);
-  localStorage.setItem('booked_events', JSON.stringify(updatedBookings));
-  return updatedBookings;
+export const bookEvent = async (userId, eventId) => {
+  try {
+    const response = await fetch(BOOKING_API_URL, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ userId, eventId })
+    });
+    if (!response.ok) throw new Error('Failed to book event');
+    return await response.json();
+  } catch (error) {
+    console.error('Error booking event:', error);
+    throw error;
+  }
+};
+
+export const cancelBooking = async (bookingId) => {
+  try {
+    const response = await fetch(`${BOOKING_API_URL}/${bookingId}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to cancel booking');
+    return true;
+  } catch (error) {
+    console.error('Error canceling booking:', error);
+    throw error;
+  }
 };

@@ -41,7 +41,11 @@ public class UserController {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
+        try {
+            emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
+        } catch (Exception e) {
+            System.err.println("Failed to dispatch welcome email: " + e.getMessage());
+        }
         return ResponseEntity.ok(new UserDTO(savedUser));
     }
 

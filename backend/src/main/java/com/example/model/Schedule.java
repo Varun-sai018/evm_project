@@ -1,6 +1,8 @@
 package com.example.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,11 +20,18 @@ public class Schedule {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id", nullable = false)
+    @NotNull(message = "Event mapping cannot be null")
     private Event event;
 
+    @NotBlank(message = "Session title is required")
     private String sessionTitle;
+    
     private String speaker;
+    
+    @NotNull(message = "Start time is required")
     private LocalDateTime startTime;
+    
+    @NotNull(message = "End time is required")
     private LocalDateTime endTime;
 
     public Long getId() { return id; }

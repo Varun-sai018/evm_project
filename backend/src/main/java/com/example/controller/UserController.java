@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.model.User;
+import com.example.dto.UserDTO;
 import com.example.repository.UserRepository;
 import com.example.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
+
+import jakarta.validation.Valid;
 
 import com.example.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,14 +35,14 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody User user) {
+    public ResponseEntity<?> signup(@Valid @RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getName());
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(new UserDTO(savedUser));
     }
 
     @PostMapping("/signin")

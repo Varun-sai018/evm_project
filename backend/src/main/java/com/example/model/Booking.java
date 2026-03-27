@@ -1,6 +1,8 @@
 package com.example.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,18 +20,24 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "User mapping cannot be null")
     private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id", nullable = false)
+    @NotNull(message = "Event mapping cannot be null")
     private Event event;
 
+    @NotNull(message = "Booking time is required")
     private LocalDateTime bookedAt;
     
+    @NotBlank(message = "Status cannot be empty")
     private String status;
 
+    @NotNull(message = "Amount cannot be missing")
     private Double amount;
     
+    @NotNull(message = "Payment status is required")
     private Boolean isPaid;
 
     public Long getId() { return id; }

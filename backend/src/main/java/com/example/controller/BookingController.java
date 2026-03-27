@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.model.Booking;
+import com.example.dto.BookingDTO;
 import com.example.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -18,13 +20,13 @@ public class BookingController {
     private BookingService bookingService;
 
     @PostMapping
-    public ResponseEntity<Booking> bookEvent(@RequestBody Map<String, Long> payload) {
+    public ResponseEntity<BookingDTO> bookEvent(@RequestBody Map<String, Long> payload) {
         Long userId = payload.get("userId");
         Long eventId = payload.get("eventId");
         
         try {
             Booking booking = bookingService.bookEvent(userId, eventId);
-            return ResponseEntity.ok(booking);
+            return ResponseEntity.ok(new BookingDTO(booking));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -41,9 +43,10 @@ public class BookingController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Booking>> getUserBookings(@PathVariable Long userId) {
+    public ResponseEntity<List<BookingDTO>> getUserBookings(@PathVariable Long userId) {
         try {
-            List<Booking> bookings = bookingService.getUserBookings(userId);
+            List<BookingDTO> bookings = bookingService.getUserBookings(userId).stream()
+                .map(BookingDTO::new).collect(Collectors.toList());
             return ResponseEntity.ok(bookings);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
@@ -51,9 +54,10 @@ public class BookingController {
     }
 
     @GetMapping("/event/{eventId}")
-    public ResponseEntity<List<Booking>> getEventAttendees(@PathVariable Long eventId) {
+    public ResponseEntity<List<BookingDTO>> getEventAttendees(@PathVariable Long eventId) {
         try {
-            List<Booking> attendees = bookingService.getEventAttendees(eventId);
+            List<BookingDTO> attendees = bookingService.getEventAttendees(eventId).stream()
+                .map(BookingDTO::new).collect(Collectors.toList());
             return ResponseEntity.ok(attendees);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();

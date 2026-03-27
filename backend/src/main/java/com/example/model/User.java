@@ -1,6 +1,8 @@
 package com.example.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
@@ -14,11 +16,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Invalid email format")
     @Column(unique = true)
     private String email;
 
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
 	public Long getId() {
@@ -51,7 +57,6 @@ public class User {
 	}
 
 	public String getEmail() {
-		// TODO Auto-generated method stub
 		return this.email;
 	}
 

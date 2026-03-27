@@ -1,6 +1,8 @@
 package com.example.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,11 +17,21 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Event title is mandatory")
     private String title;
+
+    @NotBlank(message = "Description cannot be empty")
     private String description;
+
+    @NotNull(message = "Start time is required")
     private LocalDateTime startTime;
+
+    @NotNull(message = "End time is required")
     private LocalDateTime endTime;
+
+    @NotNull(message = "Ticket price must be set")
     private Double ticketPrice;
+    
     private String location;
 	public Long getId() {
 		return id;

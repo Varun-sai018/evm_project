@@ -14,11 +14,10 @@ const getHeaders = () => {
 // Get all events
 export const getAllEvents = async () => {
   try {
-    const response = await fetch(API_URL, { headers: getHeaders() });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return await response.json();
+    const response = await fetch(`${API_URL}/events`, { headers: getHeaders() });
+    if (!response.ok) throw new Error('Failed to fetch events');
+    const data = await response.json();
+    return data.content !== undefined ? data.content : data;
   } catch (error) {
     console.error('Error fetching events:', error);
     throw error;

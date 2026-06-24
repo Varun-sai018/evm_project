@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FiLogIn, FiUser, FiLock, FiAlertCircle, FiRefreshCw, FiShield } from 'react-icons/fi';
 import './AuthPages.css';
+import { API_BASE_URL } from "../config";
 
 const createCaptcha = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -66,7 +67,7 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8056/api/users/forgot-password/send-otp', {
+      const response = await fetch(`${API_BASE_URL}/api/users/forgot-password/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail })
@@ -103,7 +104,8 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8056/api/users/forgot-password/reset', {
+      const response = await fetch(const response = await fetch(
+  `${API_BASE_URL}/api/users/forgot-password/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail, otp, newPassword })

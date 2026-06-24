@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:8056/api/schedules';
+import { API_BASE_URL } from "../config";
+const API_URL = `${API_BASE_URL}/api/schedules`;
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');

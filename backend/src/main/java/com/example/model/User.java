@@ -27,6 +27,8 @@ public class User {
     @NotBlank(message = "Password cannot be blank")
     private String password;
 
+    private String role;
+
 	public Long getId() {
 		return this.id;
 	}
@@ -58,6 +60,14 @@ public class User {
 
 	public String getEmail() {
 		return this.email;
+	}
+
+	public String getRole() {
+		return this.role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 }

@@ -22,7 +22,7 @@ const LandingPage = () => {
         // Since it's paginated or array, map safely
         const eventsList = data.content ? data.content : (Array.isArray(data) ? data : []);
         setEvents(eventsList.slice(0, 3));
-      } catch (err) {
+      } catch {
         setError('Failed to load upcoming events.');
       } finally {
         setLoading(false);
@@ -45,7 +45,7 @@ const LandingPage = () => {
               {currentUser ? (
                 <button 
                   className="btn btn-primary" 
-                  onClick={() => navigate(currentUser.role === 'admin' ? '/admin' : '/user')}
+                  onClick={() => navigate(currentUser.role === 'organizer' ? '/organizer' : '/dashboard')}
                 >
                   Go to Dashboard
                 </button>

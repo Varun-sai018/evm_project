@@ -33,6 +33,17 @@ public class Event {
     private Double ticketPrice;
     
     private String location;
+
+    @NotNull(message = "Capacity must be defined")
+    private Integer capacity;
+    
+    @Transient
+    private Integer bookedCount = 0;
+    
+    private Long organizerId;
+    
+    private String category;
+    
 	public Long getId() {
 		return id;
 	}
@@ -75,4 +86,28 @@ public class Event {
 	public void setLocation(String location) {
 		this.location = location;
 	}
+    public Integer getCapacity() {
+        return capacity;
+    }
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+    public Integer getBookedCount() {
+        return bookedCount;
+    }
+    public void setBookedCount(Integer bookedCount) {
+        this.bookedCount = bookedCount;
+    }
+    public Long getOrganizerId() {
+        return organizerId;
+    }
+    public void setOrganizerId(Long organizerId) {
+        this.organizerId = organizerId;
+    }
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

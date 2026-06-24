@@ -11,11 +11,26 @@ const getHeaders = () => {
   };
 };
 
+// Helper to catch 401/403 and auto-logout
+const checkResponse = (response) => {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login?expired=true';
+    throw new Error('Session expired. Please log in again.');
+  }
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+  return response;
+};
+
 // Get all events
-export const getAllEvents = async () => {
+export const getAllEvents = async (organizerId = null) => {
   try {
-    const response = await fetch(API_URL, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Failed to fetch events');
+    const url = organizerId ? `${API_URL}?organizerId=${organizerId}` : API_URL;
+    const response = await fetch(url, { headers: getHeaders() });
+    checkResponse(response);
     const data = await response.json();
     return data.content !== undefined ? data.content : data;
   } catch (error) {
@@ -28,9 +43,7 @@ export const getAllEvents = async () => {
 export const getEventById = async (id) => {
   try {
     const response = await fetch(`${API_URL}/${id}`, { headers: getHeaders() });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    checkResponse(response);
     return await response.json();
   } catch (error) {
     console.error(`Error fetching event with ID ${id}:`, error);
@@ -47,9 +60,7 @@ export const createEvent = async (eventData) => {
       body: JSON.stringify(eventData),
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    checkResponse(response);
     
     return await response.json();
   } catch (error) {
@@ -67,9 +78,7 @@ export const updateEvent = async (id, eventData) => {
       body: JSON.stringify(eventData),
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    checkResponse(response);
     
     return await response.json();
   } catch (error) {
@@ -86,9 +95,7 @@ export const deleteEvent = async (id) => {
       headers: getHeaders(),
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    checkResponse(response);
     
     return true; // Return true to indicate successful deletion
   } catch (error) {
@@ -102,7 +109,7 @@ const BOOKING_API_URL = 'http://localhost:8056/api/bookings';
 export const getUserBookedEvents = async (userId) => {
   try {
     const response = await fetch(`${BOOKING_API_URL}/user/${userId}`, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Failed to fetch booked events');
+    checkResponse(response);
     return await response.json();
   } catch (error) {
     console.error('Error fetching booked events:', error);
@@ -117,7 +124,7 @@ export const bookEvent = async (userId, eventId) => {
       headers: getHeaders(),
       body: JSON.stringify({ userId, eventId })
     });
-    if (!response.ok) throw new Error('Failed to book event');
+    checkResponse(response);
     return await response.json();
   } catch (error) {
     console.error('Error booking event:', error);
@@ -131,7 +138,7 @@ export const cancelBooking = async (bookingId) => {
       method: 'DELETE',
       headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Failed to cancel booking');
+    checkResponse(response);
     return true;
   } catch (error) {
     console.error('Error canceling booking:', error);
@@ -156,10 +163,10 @@ export const processPayment = async (bookingId, amount) => {
 
 export const getEventAnalytics = async (eventId) => {
   try {
-    const response = await fetch(`${API_URL}/analytics/event/${eventId}`, {
+    const response = await fetch(`http://localhost:8056/api/analytics/event/${eventId}`, {
       headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Failed to fetch event analytics');
+    checkResponse(response);
     return await response.json();
   } catch (error) {
     console.error(`Error fetching analytics for event ${eventId}:`, error);
@@ -167,12 +174,15 @@ export const getEventAnalytics = async (eventId) => {
   }
 };
 
-export const getDashboardSummary = async () => {
+export const getDashboardSummary = async (organizerId = null) => {
   try {
-    const response = await fetch(`${API_URL}/analytics/dashboard`, {
+    const url = organizerId 
+      ? `http://localhost:8056/api/analytics/dashboard?organizerId=${organizerId}` 
+      : `http://localhost:8056/api/analytics/dashboard`;
+    const response = await fetch(url, {
       headers: getHeaders()
     });
-    if (!response.ok) throw new Error('Failed to fetch dashboard summary');
+    checkResponse(response);
     return await response.json();
   } catch (error) {
     console.error('Error fetching dashboard summary:', error);

@@ -16,6 +16,7 @@ const SignupPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -51,8 +52,30 @@ const SignupPage = () => {
       return false;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+    const password = formData.password;
+    
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return false;
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      setError("Password must contain at least one uppercase letter");
+      return false;
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      setError("Password must contain at least one lowercase letter");
+      return false;
+    }
+    
+    if (!/\\d/.test(password)) {
+      setError("Password must contain at least one number");
+      return false;
+    }
+    
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setError("Password must contain at least one special character (e.g. !@#$%^&*)");
       return false;
     }
 
@@ -69,8 +92,8 @@ const SignupPage = () => {
 
     try {
       setLoading(true);
-      await signup(formData.email, formData.password, formData.name);
-      navigate("/user");
+      await signup(formData.email, formData.password, formData.name, formData.role);
+      navigate(formData.role === "organizer" ? "/organizer" : "/dashboard");
     } catch (err) {
       setError(err.message || "Failed to create an account. Please try again.");
       console.error(err);
@@ -112,6 +135,26 @@ const SignupPage = () => {
                   onChange={handleChange}
                   required
                 />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Sign Up As</label>
+              <div className="role-selector" role="group" aria-label="Select signup role">
+                <button
+                  type="button"
+                  className={`role-option ${formData.role === 'user' ? 'active' : ''}`}
+                  onClick={() => setFormData({ ...formData, role: 'user' })}
+                >
+                  User
+                </button>
+                <button
+                  type="button"
+                  className={`role-option ${formData.role === 'organizer' ? 'active' : ''}`}
+                  onClick={() => setFormData({ ...formData, role: 'organizer' })}
+                >
+                  Organizer
+                </button>
               </div>
             </div>
 

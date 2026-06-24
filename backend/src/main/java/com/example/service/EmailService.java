@@ -12,6 +12,14 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    public void sendEmail(String toEmail, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+
     public void sendWelcomeEmail(String toEmail, String name) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -34,6 +42,38 @@ public class EmailService {
                 + "Date & Time: " + event.getStartTime() + " to " + event.getEndTime() + "\n"
                 + "Location: " + locationStr + "\n\n"
                 + "We look forward to seeing you there!");
+
+        mailSender.send(message);
+    }
+
+    public void sendBookingConfirmation(String toEmail, String name, Event event, String bookingReference) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Reservation Confirmed: " + event.getTitle());
+        
+        String locationStr = event.getLocation() != null ? event.getLocation() : "Online / To Be Announced";
+        
+        message.setText("Hello " + name + ",\n\n"
+                + "Your ticket has been successfully reserved!\n\n"
+                + "Event: " + event.getTitle() + "\n"
+                + "Date & Time: " + event.getStartTime() + " to " + event.getEndTime() + "\n"
+                + "Location: " + locationStr + "\n\n"
+                + "Booking Reference: " + bookingReference + "\n\n"
+                + "Please show this reference or your QR code at the venue to pay cash and claim your pass.\n"
+                + "We look forward to seeing you there!");
+
+        mailSender.send(message);
+    }
+
+    public void sendCancellationNotice(String toEmail, String name, Event event) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Reservation Cancelled: " + event.getTitle());
+        
+        message.setText("Hello " + name + ",\n\n"
+                + "Your reservation for '" + event.getTitle() + "' has been successfully cancelled.\n\n"
+                + "If this was a mistake, you can always reserve a new ticket from the dashboard, provided tickets are still available.\n\n"
+                + "Thank you,\nEventHub Team");
 
         mailSender.send(message);
     }

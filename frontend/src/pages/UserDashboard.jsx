@@ -14,6 +14,10 @@ const UserDashboard = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('available');
   const [selectedBookingForPayment, setSelectedBookingForPayment] = useState(null);
+  
+  // Search and Filter state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterLocation, setFilterLocation] = useState('');
 
   // Fetch events and booked events on component mount
   useEffect(() => {
@@ -66,31 +70,112 @@ const UserDashboard = () => {
   };
 
   // Get IDs of booked events for easy checking
-  const bookedEventIds = bookedEvents.map(booking => booking.event.id);
+  const bookedEventIds = Array.isArray(bookedEvents) 
+    ? bookedEvents.filter(b => b && b.event).map(booking => booking.event.id) 
+    : [];
+
+  // Compute Upcoming and Completed Events
+  const now = new Date();
+  
+  // Set to start of day so events happening today are still considered "Available" all day
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const safeEvents = Array.isArray(events) ? events : [];
+  
+  // Safe date parser: if date is missing or invalid, default to future so it remains in Events tab
+  const getSafeDate = (dateString) => {
+    if (!dateString) return new Date(todayStart.getTime() + 86400000); 
+    const d = new Date(dateString);
+    return isNaN(d.getTime()) ? new Date(todayStart.getTime() + 86400000) : d;
+  };
+
+  // Compare against todayStart instead of the exact current millisecond
+  const upcomingEvents = safeEvents.filter(e => getSafeDate(e.endTime) >= todayStart);
+  const completedEvents = safeEvents.filter(e => getSafeDate(e.endTime) < todayStart);
+
+  // Filter the currently displayed list
+  const getFilteredEvents = (list) => {
+    return list.filter(e => {
+      const title = String((e && e.title) || '');
+      const location = String((e && e.location) || '');
+      const matchesSearch = title.toLowerCase().includes(String(searchTerm || '').toLowerCase());
+      const matchesLocation = filterLocation ? location.includes(String(filterLocation || '')) : true;
+      return matchesSearch && matchesLocation;
+    });
+  };
+
+  const filteredUpcoming = getFilteredEvents(upcomingEvents);
+  const filteredCompleted = getFilteredEvents(completedEvents);
+
+  // Extract unique locations for the filter dropdown
+  const uniqueLocations = [...new Set(safeEvents.map(e => e && e.location).filter(Boolean))];
 
   return (
     <div className="dashboard user-dashboard">
       <div className="container">
-        <div className="dashboard-header">
-          <h1 className="dashboard-title">User Dashboard</h1>
+        {/* Hero Section */}
+        <div className="dashboard-hero">
+          <h1>Welcome back, {currentUser?.name}!</h1>
+          <p>Discover and manage your incredible events.</p>
         </div>
 
-        <div className="dashboard-tabs">
+        {/* Modern Tabs */}
+        <div className="modern-tabs">
           <button 
-            className={`tab ${activeTab === 'available' ? 'active' : ''}`}
+            className={`modern-tab ${activeTab === 'available' ? 'active' : ''}`}
             onClick={() => setActiveTab('available')}
           >
-            Available Events
+            Events
           </button>
           <button 
-            className={`tab ${activeTab === 'booked' ? 'active' : ''}`}
+            className={`modern-tab ${activeTab === 'booked' ? 'active' : ''}`}
             onClick={() => setActiveTab('booked')}
           >
-            My Bookings
-            {bookedEvents.length > 0 && (
-              <span className="tab-badge">{bookedEvents.length}</span>
+            My Reservations
+            {Array.isArray(bookedEvents) && bookedEvents.length > 0 && (
+              <span className="tab-badge" style={{ background: activeTab === 'booked' ? 'rgba(255,255,255,0.2)' : 'var(--primary-color)' }}>
+                {bookedEvents.length}
+              </span>
             )}
           </button>
+          <button 
+            className={`modern-tab ${activeTab === 'completed' ? 'active' : ''}`}
+            onClick={() => setActiveTab('completed')}
+          >
+            Completed Events
+            {Array.isArray(completedEvents) && completedEvents.length > 0 && (
+              <span className="tab-badge" style={{ background: activeTab === 'completed' ? 'rgba(255,255,255,0.2)' : '#6c757d' }}>
+                {completedEvents.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="search-filter-container">
+          <div className="search-input-wrapper">
+            <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search for amazing events by title..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-wrapper">
+            <select 
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+            >
+              <option value="">🗺️ All Locations</option>
+              {uniqueLocations.map(loc => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {error && (
@@ -107,17 +192,24 @@ const UserDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'available' && !loading && !error && events.length === 0 && (
+        {activeTab === 'available' && !loading && !error && filteredUpcoming.length === 0 && (
           <div className="dashboard-empty">
             <h3>No events available</h3>
-            <p>Check back later for upcoming events.</p>
+            <p>Try adjusting your search or check back later.</p>
           </div>
         )}
 
-        {activeTab === 'booked' && !loading && !error && bookedEvents.length === 0 && (
+        {activeTab === 'completed' && !loading && !error && filteredCompleted.length === 0 && (
           <div className="dashboard-empty">
-            <h3>No booked events</h3>
-            <p>You haven't booked any events yet. Browse available events to book.</p>
+            <h3>No completed events</h3>
+            <p>There are no past events to display.</p>
+          </div>
+        )}
+
+        {activeTab === 'booked' && Array.isArray(bookedEvents) && bookedEvents.length === 0 && (
+          <div className="dashboard-empty">
+            <h3>No reservations</h3>
+            <p>You haven't reserved any events yet. Browse available events to book.</p>
             <button 
               className="btn btn-primary" 
               onClick={() => setActiveTab('available')}
@@ -128,9 +220,9 @@ const UserDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'available' && events.length > 0 && (
+        {activeTab === 'available' && filteredUpcoming.length > 0 && (
           <div className="events-grid">
-            {events.map(event => (
+            {filteredUpcoming.map(event => (
               <EventCard
                 key={event.id}
                 event={event}
@@ -141,16 +233,29 @@ const UserDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'booked' && bookedEvents.length > 0 && (
+        {activeTab === 'completed' && filteredCompleted.length > 0 && (
           <div className="events-grid">
-            {bookedEvents.map(booking => (
+            {filteredCompleted.map(event => (
+              <EventCard
+                key={event.id}
+                event={event}
+                isBooked={bookedEventIds.includes(event.id)}
+                onBook={() => {}} // Can't book completed
+              />
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'booked' && Array.isArray(bookedEvents) && bookedEvents.length > 0 && (
+          <div className="events-grid">
+            {bookedEvents.filter(b => b && b.event).map(booking => (
               <EventCard
                 key={booking.event.id}
                 event={booking.event}
                 isBooked={true}
                 bookingStatus={booking.status}
                 onCancelBooking={() => handleCancelBooking(booking.id)}
-                onPayNow={booking.status === 'PENDING' ? () => setSelectedBookingForPayment(booking) : undefined}
+                onPayNow={booking.status === 'RESERVED' ? () => setSelectedBookingForPayment(booking) : undefined}
               />
             ))}
           </div>
@@ -163,7 +268,7 @@ const UserDashboard = () => {
               setSelectedBookingForPayment(null);
               getUserBookedEvents(currentUser.id).then(setBookedEvents).catch(console.error);
             }}
-            onSuccess={(confirmedBooking) => {
+            onSuccess={() => {
               setSelectedBookingForPayment(null);
               getUserBookedEvents(currentUser.id).then(setBookedEvents).catch(console.error);
             }}

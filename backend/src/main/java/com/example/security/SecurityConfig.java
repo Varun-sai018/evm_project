@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/users/signup", 
                     "/api/users/signin", 
+                    "/api/users/forgot-password/**",
                     "/error"
                 ).permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events").permitAll()

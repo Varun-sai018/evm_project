@@ -40,6 +40,8 @@ public class Booking {
     @NotNull(message = "Payment status is required")
     private Boolean isPaid;
 
+    private String bookingReference;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public User getUser() { return user; }
@@ -54,4 +56,6 @@ public class Booking {
     public void setAmount(Double amount) { this.amount = amount; }
     public Boolean getIsPaid() { return isPaid; }
     public void setIsPaid(Boolean isPaid) { this.isPaid = isPaid; }
+    public String getBookingReference() { return bookingReference; }
+    public void setBookingReference(String bookingReference) { this.bookingReference = bookingReference; }
 }

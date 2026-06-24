@@ -50,16 +50,35 @@ public class AnalyticsService {
         return analytics;
     }
 
-    public Map<String, Object> getDashboardSummary() {
-        List<Event> allEvents = eventRepository.findAll();
-        List<Booking> allBookings = bookingRepository.findAll();
+    public Map<String, Object> getDashboardSummary(Long organizerId) {
+        List<Event> events;
+        if (organizerId != null) {
+            // Find all events for this organizer
+            events = eventRepository.findByOrganizerId(organizerId, org.springframework.data.domain.Pageable.unpaged()).getContent();
+        } else {
+            events = eventRepository.findAll();
+        }
 
-        long totalEvents = allEvents.size();
-        long totalBookings = allBookings.size();
-        double totalRevenue = allBookings.stream()
-                .filter(b -> b.getIsPaid() != null && b.getIsPaid())
-                .mapToDouble(b -> b.getAmount() != null ? b.getAmount() : 0.0)
-                .sum();
+        long totalEvents = events.size();
+        long totalBookings = 0;
+        double totalRevenue = 0.0;
+
+        for (Event event : events) {
+            List<Booking> eventBookings = bookingRepository.findByEvent(event);
+            
+            // Only count active bookings (not CANCELLED)
+            long activeBookings = eventBookings.stream()
+                    .filter(b -> !"CANCELLED".equals(b.getStatus()))
+                    .count();
+                    
+            totalBookings += activeBookings;
+            
+            totalRevenue += eventBookings.stream()
+                    .filter(b -> !"CANCELLED".equals(b.getStatus()))
+                    .filter(b -> b.getIsPaid() != null && b.getIsPaid())
+                    .mapToDouble(b -> b.getAmount() != null ? b.getAmount() : 0.0)
+                    .sum();
+        }
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("totalEvents", totalEvents);

@@ -33,6 +33,8 @@ public class BookingDTO {
     
     @NotNull(message = "Payment status is required")
     private Boolean isPaid;
+    
+    private String bookingReference;
 
     public BookingDTO(Booking booking) {
         this.id = booking.getId();
@@ -42,5 +44,6 @@ public class BookingDTO {
         this.status = booking.getStatus();
         this.amount = booking.getAmount();
         this.isPaid = booking.getIsPaid();
+        this.bookingReference = booking.getBookingReference();
     }
 }

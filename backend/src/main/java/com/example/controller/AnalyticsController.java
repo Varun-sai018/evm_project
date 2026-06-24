@@ -25,9 +25,9 @@ public class AnalyticsController {
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<Map<String, Object>> getDashboardSummary() {
+    public ResponseEntity<Map<String, Object>> getDashboardSummary(@RequestParam(required = false) Long organizerId) {
         try {
-            return ResponseEntity.ok(analyticsService.getDashboardSummary());
+            return ResponseEntity.ok(analyticsService.getDashboardSummary(organizerId));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

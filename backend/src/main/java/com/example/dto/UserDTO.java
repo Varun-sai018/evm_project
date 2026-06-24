@@ -19,10 +19,13 @@ public class UserDTO {
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Invalid email format")
     private String email;
+    
+    private String role;
 
     public UserDTO(User user) {
         this.id = user.getId();
         this.name = user.getName();
         this.email = user.getEmail();
+        this.role = user.getRole();
     }
 }

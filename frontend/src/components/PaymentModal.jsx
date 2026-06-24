@@ -1,99 +1,64 @@
-import { useState } from 'react';
+import { FiCheckCircle } from 'react-icons/fi';
 import Modal from './Modal';
-import { processPayment } from '../services/eventService';
 import './EventForm.css';
 
 const PaymentModal = ({ booking, onClose, onSuccess }) => {
-  const [formData, setFormData] = useState({
-    cardName: '',
-    cardNumber: '',
-    expiry: '',
-    cvv: ''
-  });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
-
+  const reference = booking?.bookingReference || "PENDING";
   const ticketPrice = booking?.event?.ticketPrice || 0;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-    if (paymentError) setPaymentError('');
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.cardName.trim()) newErrors.cardName = 'Cardholder name is required';
-    if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s+/g, ''))) newErrors.cardNumber = 'Card number must be 16 digits';
-    if (!/^\d{2}\/\d{2}$/.test(formData.expiry)) newErrors.expiry = 'Expiry must be MM/YY';
-    if (!/^\d{3,4}$/.test(formData.cvv)) newErrors.cvv = 'CVV must be 3 or 4 digits';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
-    try {
-      setLoading(true);
-      await processPayment(booking.id, ticketPrice);
-      alert('Payment processed successfully!');
-      onSuccess();
-    } catch (err) {
-      console.error('Payment failed:', err);
-      setPaymentError(err.message || 'Payment processing failed');
-    } finally {
-      setLoading(false);
-    }
+  const handleClose = () => {
+    if (onSuccess) onSuccess();
+    if (onClose) onClose();
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Process Payment">
-      <form onSubmit={handleSubmit} className="event-form">
-        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-          <h4>Paying for: {booking?.event?.title}</h4>
-          <h3>Amount Due: ${ticketPrice.toFixed(2)}</h3>
-        </div>
+    <Modal isOpen={true} onClose={handleClose} title="Reservation Confirmed!">
+      <div className="event-form" style={{ textAlign: 'center', padding: '20px' }}>
+        <FiCheckCircle size={64} style={{ color: 'var(--success-color)', marginBottom: '15px' }} />
+        <h2 style={{ marginBottom: '10px' }}>Your ticket is reserved!</h2>
+        <p style={{ color: 'var(--text-light)', marginBottom: '20px' }}>
+          Show this QR Code at the venue counter to pay cash and claim your physical pass.
+        </p>
 
-        {paymentError && <div className="form-error" style={{ marginBottom: '15px' }}>{paymentError}</div>}
-
-        <div className="form-group">
-          <label className="form-label">Cardholder Name</label>
-          <input type="text" name="cardName" className={`form-input ${errors.cardName ? 'error' : ''}`} value={formData.cardName} onChange={handleChange} placeholder="John Doe" />
-          {errors.cardName && <p className="form-error">{errors.cardName}</p>}
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Card Number</label>
-          <input type="text" name="cardNumber" className={`form-input ${errors.cardNumber ? 'error' : ''}`} value={formData.cardNumber} onChange={handleChange} placeholder="1234 5678 9101 1121" maxLength="19" />
-          {errors.cardNumber && <p className="form-error">{errors.cardNumber}</p>}
-        </div>
-
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">Expiry (MM/YY)</label>
-            <input type="text" name="expiry" className={`form-input ${errors.expiry ? 'error' : ''}`} value={formData.expiry} onChange={handleChange} placeholder="12/26" maxLength="5" />
-            {errors.expiry && <p className="form-error">{errors.expiry}</p>}
-          </div>
-
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">CVV</label>
-            <input type="text" name="cvv" className={`form-input ${errors.cvv ? 'error' : ''}`} value={formData.cvv} onChange={handleChange} placeholder="123" maxLength="4" />
-            {errors.cvv && <p className="form-error">{errors.cvv}</p>}
+        <div style={{
+          background: 'white',
+          padding: '20px',
+          display: 'inline-block',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          marginBottom: '20px'
+        }}>
+          {/* Mock QR Code using CSS grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 20px)',
+            gridTemplateRows: 'repeat(5, 20px)',
+            gap: '2px',
+            background: 'white'
+          }}>
+            {[...Array(25)].map((_, i) => (
+              <div key={i} style={{
+                background: Math.random() > 0.4 ? '#000' : '#fff',
+                borderRadius: '2px'
+              }}></div>
+            ))}
           </div>
         </div>
 
-        <div className="event-form-actions">
-          <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Processing...' : `Pay $${ticketPrice.toFixed(2)}`}
-          </button>
+        <div style={{ background: 'var(--background-color)', padding: '15px', borderRadius: '8px', marginBottom: '25px' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-light)' }}>Booking Reference</p>
+          <h3 style={{ margin: '5px 0', letterSpacing: '2px', color: 'var(--primary-color)' }}>{reference}</h3>
         </div>
-      </form>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', borderTop: '1px solid var(--border-color)', marginBottom: '20px' }}>
+          <span style={{ fontWeight: '600' }}>{booking?.event?.title}</span>
+          <span style={{ fontWeight: 'bold', color: 'var(--success-color)' }}>Due: ₹{Number(ticketPrice).toFixed(2)}</span>
+        </div>
+
+        <button type="button" className="btn btn-primary" onClick={handleClose} style={{ width: '100%' }}>
+          Done
+        </button>
+      </div>
     </Modal>
   );
 };

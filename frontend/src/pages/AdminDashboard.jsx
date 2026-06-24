@@ -5,11 +5,14 @@ import EventCard from '../components/EventCard';
 import Modal from '../components/Modal';
 import EventForm from '../components/EventForm';
 import AdminScheduleModal from '../components/AdminScheduleModal';
+import AttendeesModal from '../components/AttendeesModal';
 import { getAllEvents, createEvent, updateEvent, deleteEvent, getDashboardSummary } from '../services/eventService';
+import { useAuth } from '../contexts/AuthContext';
 import './Dashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -17,6 +20,7 @@ const AdminDashboard = () => {
   const [currentEvent, setCurrentEvent] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [scheduleEvent, setScheduleEvent] = useState(null);
+  const [attendeesEvent, setAttendeesEvent] = useState(null);
   const [summary, setSummary] = useState(null);
 
   // Fetch events on component mount
@@ -28,10 +32,12 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await getAllEvents();
-      setEvents(data);
+      const data = await getAllEvents(currentUser?.id);
+      // Backend now filters it, but we can do a secondary safety filter
+      const myEvents = data.filter(e => e.organizerId === currentUser?.id);
+      setEvents(myEvents);
       try {
-        const sumData = await getDashboardSummary();
+        const sumData = await getDashboardSummary(currentUser?.id);
         setSummary(sumData);
       } catch (err) {
         console.error('Failed sum data load', err);
@@ -65,8 +71,8 @@ const AdminDashboard = () => {
         // Update existing event
         await updateEvent(currentEvent.id, formData);
       } else {
-        // Create new event
-        await createEvent(formData);
+        // Create new event, attach organizerId
+        await createEvent({ ...formData, organizerId: currentUser?.id });
       }
       
       // Refresh events list and close modal
@@ -104,7 +110,7 @@ const AdminDashboard = () => {
     <div className="dashboard admin-dashboard">
       <div className="container">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">Admin Dashboard</h1>
+          <h1 className="dashboard-title">Organizer Dashboard</h1>
           <button className="btn btn-primary" onClick={handleAddEvent}>
             <FiPlus className="btn-icon" />
             Add Event
@@ -123,7 +129,7 @@ const AdminDashboard = () => {
             </div>
             <div style={{ flex: 1, borderLeft: '1px solid var(--border-color)', paddingLeft: '20px' }}>
               <h4 style={{ color: 'var(--text-light)', marginBottom: '5px' }}>Total Revenue</h4>
-              <h2 style={{ fontSize: '2rem', color: 'var(--success-color)' }}>₹{summary.totalRevenue.toFixed(2)}</h2>
+              <h2 style={{ fontSize: '2rem', color: 'var(--success-color)' }}>₹{Number(summary.totalRevenue || 0).toFixed(2)}</h2>
             </div>
           </div>
         )}
@@ -163,12 +169,21 @@ const AdminDashboard = () => {
                 onEdit={handleEditEvent}
                 onDelete={handleDeleteClick}
                 onManageSchedule={(e) => setScheduleEvent(e)}
-                onAnalytics={(eventId) => navigate(`/admin/analytics/${eventId}`)}
+                onAnalytics={(eventId) => navigate(`/organizer/analytics/${eventId}`)}
+                onViewAttendees={(eventId) => setAttendeesEvent(events.find(e => e.id === eventId))}
               />
             ))}
           </div>
         )}
       </div>
+
+      {attendeesEvent && (
+        <AttendeesModal 
+          eventId={attendeesEvent.id} 
+          eventTitle={attendeesEvent.title} 
+          onClose={() => setAttendeesEvent(null)} 
+        />
+      )}
 
       {/* Modal for adding/editing events */}
       <Modal

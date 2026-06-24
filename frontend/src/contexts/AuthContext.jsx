@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -37,18 +36,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
 
     const user = data.user; 
-    user.role = user.email === 'admin@example.com' ? 'admin' : 'user';
+    // Role is now provided by the backend, no need to hardcode
 
     setCurrentUser(user);
     localStorage.setItem('user', JSON.stringify(user));
     return user;
   };
 
-  const signup = async (email, password, name) => {
+  const signup = async (email, password, name, role) => {
     const response = await fetch('http://localhost:8056/api/users/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name })
+      body: JSON.stringify({ email, password, name, role })
     });
 
     if (!response.ok) {
@@ -72,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
-    isAdmin: currentUser?.role === 'admin',
+    isAdmin: currentUser?.role === 'organizer', // Keeping the internal prop name isAdmin but mapping to 'organizer'
     isUser: currentUser?.role === 'user',
   };
 

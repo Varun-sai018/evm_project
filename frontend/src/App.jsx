@@ -7,12 +7,13 @@ import SignupPage from './pages/SignupPage';
 import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import AnalyticsPage from './pages/AnalyticsPage';
+import EventDetailsPage from './pages/EventDetailsPage';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 
 function App() {
 
-  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
+  const [darkMode] = useState(localStorage.getItem('darkMode') === 'true');
 
 
   useEffect(() => {
@@ -24,22 +25,19 @@ function App() {
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
 
-  const toggleDarkMode = () => {
-    setDarkMode(prev => !prev);
-  };
-
   return (
     <AuthProvider>
       <Router>
-        <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <Navbar />
         <div className="page-content">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/analytics/:eventId" element={<ProtectedRoute role="admin"><AnalyticsPage /></ProtectedRoute>} />
-            <Route path="/user" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
+            <Route path="/organizer" element={<ProtectedRoute role="organizer"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/organizer/analytics/:eventId" element={<ProtectedRoute role="organizer"><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
+            <Route path="/event/:id" element={<EventDetailsPage />} />
           </Routes>
         </div>
       </Router>
@@ -55,8 +53,15 @@ function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
   
-  if (user.role !== role) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/user'} replace />;
+  // Normalize role in case of case-mismatch or missing old data
+  const userRole = user.role ? user.role.toLowerCase() : 'user';
+  
+  if (userRole !== role) {
+    // Prevent infinite redirect if we're already trying to go to the default route
+    if (role === 'user' && userRole !== 'organizer') {
+      return children;
+    }
+    return <Navigate to={userRole === 'organizer' ? '/organizer' : '/dashboard'} replace />;
   }
   
   return children;

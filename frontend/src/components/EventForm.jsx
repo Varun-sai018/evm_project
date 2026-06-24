@@ -7,7 +7,10 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
     description: '',
     startTime: '',
     endTime: '',
-    ticketPrice: 0
+    ticketPrice: 0,
+    location: '',
+    capacity: 100,
+    category: 'technology'
   });
   
   const [errors, setErrors] = useState({});
@@ -21,15 +24,33 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
         return date.toISOString().slice(0, 16);
       };
       
+      const getMinDateTime = () => {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        return now.toISOString().slice(0, 16);
+      };
+      
       setFormData({
         title: event.title || '',
         description: event.description || '',
         startTime: event.startTime ? formatDateForInput(event.startTime) : '',
         endTime: event.endTime ? formatDateForInput(event.endTime) : '',
-        ticketPrice: event.ticketPrice !== undefined ? event.ticketPrice : 0
+        ticketPrice: event.ticketPrice !== undefined ? event.ticketPrice : 0,
+        location: event.location || '',
+        capacity: event.capacity !== undefined ? event.capacity : 100,
+        category: event.category || 'technology'
       });
     }
   }, [event]);
+
+  const THEMES = [
+    { id: 'technology', label: 'Technology', icon: '💻' },
+    { id: 'music', label: 'Music & Concerts', icon: '🎵' },
+    { id: 'business', label: 'Business', icon: '💼' },
+    { id: 'sports', label: 'Sports', icon: '⚽' },
+    { id: 'arts', label: 'Arts & Culture', icon: '🎨' },
+    { id: 'food', label: 'Food & Drink', icon: '🍔' }
+  ];
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,17 +79,31 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
       newErrors.description = 'Description is required';
     }
     
+    const now = new Date();
+    
     if (!formData.startTime) {
       newErrors.startTime = 'Start time is required';
+    } else if (new Date(formData.startTime) < now) {
+      newErrors.startTime = 'Event cannot start in the past';
     }
     
     if (!formData.endTime) {
       newErrors.endTime = 'End time is required';
+    } else if (new Date(formData.endTime) < now) {
+      newErrors.endTime = 'Event cannot end in the past';
     } else if (formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime)) {
       newErrors.endTime = 'End time must be after start time';
     }
     if (formData.ticketPrice === '' || Number(formData.ticketPrice) < 0) {
       newErrors.ticketPrice = 'Valid ticket price is required';
+    }
+    
+    if (!formData.location?.trim()) {
+      newErrors.location = 'Location/Place is required';
+    }
+
+    if (!formData.capacity || Number(formData.capacity) <= 0) {
+      newErrors.capacity = 'Capacity must be at least 1';
     }
     
     setErrors(newErrors);
@@ -122,6 +157,7 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
           name="startTime"
           className={`form-input ${errors.startTime ? 'error' : ''}`}
           value={formData.startTime}
+          min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
           onChange={handleChange}
         />
         {errors.startTime && <p className="form-error">{errors.startTime}</p>}
@@ -135,6 +171,7 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
           name="endTime"
           className={`form-input ${errors.endTime ? 'error' : ''}`}
           value={formData.endTime}
+          min={formData.startTime || new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
           onChange={handleChange}
         />
         {errors.endTime && <p className="form-error">{errors.endTime}</p>}
@@ -153,6 +190,54 @@ const EventForm = ({ event, onSubmit, onCancel }) => {
           onChange={handleChange}
         />
         {errors.ticketPrice && <p className="form-error">{errors.ticketPrice}</p>}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="location" className="form-label">Location (Place)</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          className={`form-input ${errors.location ? 'error' : ''}`}
+          value={formData.location}
+          onChange={handleChange}
+          placeholder="E.g. Main Auditorium"
+        />
+        {errors.location && <p className="form-error">{errors.location}</p>}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="capacity" className="form-label">Total Capacity (People)</label>
+        <input
+          type="number"
+          id="capacity"
+          name="capacity"
+          min="1"
+          className={`form-input ${errors.capacity ? 'error' : ''}`}
+          value={formData.capacity}
+          onChange={handleChange}
+          placeholder="E.g. 200"
+        />
+        {errors.capacity && <p className="form-error">{errors.capacity}</p>}
+      </div>
+      
+      <div className="form-group">
+        <label className="form-label">Event Theme / Visual Category</label>
+        <p className="form-hint" style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '10px' }}>
+          Select a category to represent your event on the dashboard.
+        </p>
+        <div className="theme-selector-grid">
+          {THEMES.map(theme => (
+            <div 
+              key={theme.id}
+              className={`theme-card ${formData.category === theme.id ? 'active' : ''}`}
+              onClick={() => setFormData(prev => ({ ...prev, category: theme.id }))}
+            >
+              <div className="theme-icon">{theme.icon}</div>
+              <div className="theme-label">{theme.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
       
       <div className="event-form-actions">

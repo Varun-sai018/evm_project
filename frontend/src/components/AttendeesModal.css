@@ -1,0 +1,136 @@
+.attendees-modal {
+  max-width: 500px;
+}
+
+.modal-subtitle {
+  color: var(--primary-color);
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+.attendees-loading,
+.attendees-error,
+.attendees-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 15px;
+}
+
+.attendees-loading {
+  color: var(--gray-600);
+}
+
+.attendees-error {
+  background: var(--error-50);
+  color: var(--error-700);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.empty-icon {
+  color: var(--gray-400);
+  margin-bottom: 10px;
+}
+
+.attendees-empty h3 {
+  color: var(--gray-800);
+  margin-bottom: 5px;
+}
+
+.attendees-empty p {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.attendees-count {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.attendees-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.attendees-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.attendees-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.attendees-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.attendee-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.attendee-item:hover {
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-color: var(--primary-color);
+}
+
+.attendee-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 15px;
+}
+
+.attendee-info {
+  flex: 1;
+}
+
+.attendee-info h4 {
+  margin: 0 0 5px 0;
+  color: var(--gray-900);
+  font-size: 1rem;
+}
+
+.attendee-email {
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+:root.dark-theme .attendee-item {
+  background: var(--surface-color);
+}
+
+:root.dark-theme .attendee-item:hover {
+  background: var(--card-bg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}

@@ -16,7 +16,7 @@ const AnalyticsPage = () => {
       try {
         const data = await getEventAnalytics(eventId);
         setAnalytics(data);
-      } catch (err) {
+      } catch {
         setError('Failed to load analytics data.');
       } finally {
         setLoading(false);
@@ -38,7 +38,7 @@ const AnalyticsPage = () => {
     <div className="dashboard">
       <div className="container">
         <div className="dashboard-header" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button className="btn btn-outline" onClick={() => navigate('/admin')}>
+          <button className="btn btn-outline" onClick={() => navigate('/organizer')}>
             <FiArrowLeft /> Back
           </button>
           <h1 className="dashboard-title">Analytics: {analytics.eventTitle}</h1>

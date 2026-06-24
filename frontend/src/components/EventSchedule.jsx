@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { getEventSessions } from '../services/scheduleService';
 import { format } from 'date-fns';
 import { FiClock, FiUser, FiInfo } from 'react-icons/fi';
@@ -7,11 +7,7 @@ const EventSchedule = ({ eventId }) => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [eventId]);
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getEventSessions(eventId);
@@ -21,13 +17,17 @@ const EventSchedule = ({ eventId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [eventId]);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
     try {
       return format(new Date(timeString), 'h:mm a');
-    } catch (e) {
+    } catch {
       return timeString;
     }
   };

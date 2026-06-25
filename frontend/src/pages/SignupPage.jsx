@@ -69,7 +69,7 @@ const SignupPage = () => {
       return false;
     }
     
-    if (!/\\d/.test(password)) {
+    if (!/\d/.test(password)) {
       setError("Password must contain at least one number");
       return false;
     }

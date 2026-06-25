@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FiLogIn, FiUser, FiLock, FiAlertCircle, FiRefreshCw, FiShield } from 'react-icons/fi';
 import './AuthPages.css';
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from '../config';
 
 const createCaptcha = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -31,7 +31,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
 
   const refreshCaptcha = () => {
@@ -67,7 +67,7 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/users/forgot-password/send-otp`, {
+      const response = await fetch(`${API_BASE_URL}/users/forgot-password/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail })
@@ -104,8 +104,7 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(const response = await fetch(
-  `${API_BASE_URL}/api/users/forgot-password/reset`, {
+      const response = await fetch(`${API_BASE_URL}/users/forgot-password/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail, otp, newPassword })
@@ -152,8 +151,8 @@ const LoginPage = () => {
       const user = await login(email, password);
       const normalizedRole = user.role ? user.role.replace('ROLE_', '').toLowerCase() : 'user';
       if (normalizedRole !== selectedRole.toLowerCase()) {
-        // If they chose the wrong role toggle, just switch it and log them in anyway!
-        console.log(`User role mismatch. Backend: ${normalizedRole}, Selected: ${selectedRole}. Auto-correcting.`);
+        logout();
+        throw new Error(`Invalid login: This account is registered as ${normalizedRole === 'organizer' ? 'an Organizer' : 'a User'}. Please select the correct role above.`);
       }
       navigate(normalizedRole === 'organizer' ? '/organizer' : '/dashboard');
     } catch (err) {

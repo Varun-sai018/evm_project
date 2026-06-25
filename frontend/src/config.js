@@ -1,2 +1,1 @@
-export const API_BASE_URL =
-  "https://evmproject-production.up.railway.app";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "https://evmproject-production.up.railway.app";

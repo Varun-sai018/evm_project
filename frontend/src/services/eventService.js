@@ -2,7 +2,7 @@
 
 import { API_BASE_URL } from "../config";
 
-const API_URL = `${API_BASE_URL}/api/events`;
+const API_URL = `${API_BASE_URL}/events`;
 
 // Helper for auth headers
 const getHeaders = () => {
@@ -106,7 +106,7 @@ export const deleteEvent = async (id) => {
   }
 };
 
-const BOOKING_API_URL = `${API_BASE_URL}/api/bookings`;
+const BOOKING_API_URL = `${API_BASE_URL}/bookings`;
 
 export const getUserBookedEvents = async (userId) => {
   try {
@@ -150,7 +150,7 @@ export const cancelBooking = async (bookingId) => {
 
 export const processPayment = async (bookingId, amount) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/payments/process`, {
+    const response = await fetch(`${API_BASE_URL}/payments/process`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ bookingId, amount })
@@ -165,7 +165,7 @@ export const processPayment = async (bookingId, amount) => {
 
 export const getEventAnalytics = async (eventId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/analytics/event/${eventId}`, {
+    const response = await fetch(`${API_BASE_URL}/analytics/event/${eventId}`, {
       headers: getHeaders()
     });
     checkResponse(response);
@@ -179,8 +179,8 @@ export const getEventAnalytics = async (eventId) => {
 export const getDashboardSummary = async (organizerId = null) => {
   try {
     const url = organizerId 
-      ? `${API_BASE_URL}/api/analytics/dashboard?organizerId=${organizerId}` 
-      : `${API_BASE_URL}/api/analytics/dashboard`;
+      ? `${API_BASE_URL}/analytics/dashboard?organizerId=${organizerId}` 
+      : `${API_BASE_URL}/analytics/dashboard`;
     const response = await fetch(url, {
       headers: getHeaders()
     });

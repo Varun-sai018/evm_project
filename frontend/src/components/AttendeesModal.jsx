@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiUsers, FiMail, FiLoader, FiAlertCircle } from 'react-icons/fi';
 import './AttendeesModal.css';
+import { API_BASE_URL } from '../config';
 
 const AttendeesModal = ({ eventId, eventTitle, onClose }) => {
   const [attendees, setAttendees] = useState([]);
@@ -12,7 +13,7 @@ const AttendeesModal = ({ eventId, eventTitle, onClose }) => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8056/api/bookings/event/${eventId}`, {
+        const response = await fetch(`${API_BASE_URL}/bookings/event/${eventId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

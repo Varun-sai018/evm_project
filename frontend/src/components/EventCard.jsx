@@ -175,6 +175,14 @@ const EventCard = ({
             >
               Event Completed
             </button>
+          ) : (new Date(event.startTime) < new Date() && !isBooked) ? (
+            <button 
+              className="btn btn-secondary btn-sm"
+              disabled
+              style={{ opacity: 0.6, cursor: 'not-allowed', width: '100%' }}
+            >
+              Booking Closed
+            </button>
           ) : isBooked && onCancelBooking ? (
             <div style={{display: 'flex', flexDirection: 'column', gap: '8px', width: '100%'}}>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>

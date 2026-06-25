@@ -170,6 +170,7 @@ const EventDetailsPage = () => {
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', textAlign: 'center' }}>
               {(() => {
                 const isCompleted = new Date(event.endTime) < new Date();
+                const hasStarted = new Date(event.startTime) < new Date();
                 
                 if (isCompleted && !isAlreadyBooked) {
                   return (
@@ -179,6 +180,18 @@ const EventDetailsPage = () => {
                       disabled
                     >
                       Event Completed
+                    </button>
+                  );
+                }
+                
+                if (hasStarted && !isAlreadyBooked) {
+                  return (
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ padding: '15px 40px', fontSize: '1.1rem', opacity: 0.6, cursor: 'not-allowed', background: '#6c757d', border: 'none', color: 'white' }}
+                      disabled
+                    >
+                      Booking Closed
                     </button>
                   );
                 }

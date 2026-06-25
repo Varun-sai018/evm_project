@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "../config";
-const API_URL = `${API_BASE_URL}/api/schedules`;
+const API_URL = `${API_BASE_URL}/schedules`;
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');

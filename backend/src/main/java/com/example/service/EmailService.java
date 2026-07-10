@@ -26,7 +26,13 @@ public class EmailService {
         message.setSubject("Welcome to Our App");
         message.setText("Hello " + name + ",\n\nWelcome to our Event Management App!\nWe're glad to have you on board.");
 
-        mailSender.send(message);
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                mailSender.send(message);
+            } catch (Exception e) {
+                System.err.println("Failed to send async welcome email: " + e.getMessage());
+            }
+        });
     }
 
     public void sendEventReminder(String toEmail, String name, Event event) {

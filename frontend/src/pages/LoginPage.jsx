@@ -150,11 +150,18 @@ const LoginPage = () => {
       setLoading(true);
       const user = await login(email, password);
       const normalizedRole = user.role ? user.role.replace('ROLE_', '').toLowerCase() : 'user';
-      if (normalizedRole !== selectedRole.toLowerCase()) {
+      
+      // Admins bypass the role selection toggle
+      if (normalizedRole !== 'admin' && normalizedRole !== selectedRole.toLowerCase()) {
         logout();
         throw new Error(`Invalid login: This account is registered as ${normalizedRole === 'organizer' ? 'an Organizer' : 'a User'}. Please select the correct role above.`);
       }
-      navigate(normalizedRole === 'organizer' ? '/organizer' : '/dashboard');
+      
+      if (normalizedRole === 'admin') {
+        navigate('/admin/approvals');
+      } else {
+        navigate(normalizedRole === 'organizer' ? '/organizer' : '/dashboard');
+      }
     } catch (err) {
       setError(err.message || 'Failed to log in. Please check your credentials.');
       console.error(err);

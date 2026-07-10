@@ -1,6 +1,7 @@
 package com.example.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import com.example.model.Event;
@@ -12,8 +13,12 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     public void sendEmail(String toEmail, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject(subject);
         message.setText(body);
@@ -22,6 +27,7 @@ public class EmailService {
 
     public void sendWelcomeEmail(String toEmail, String name) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Welcome to Our App");
         message.setText("Hello " + name + ",\n\nWelcome to our Event Management App!\nWe're glad to have you on board.");
@@ -37,6 +43,7 @@ public class EmailService {
 
     public void sendEventReminder(String toEmail, String name, Event event) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Reminder: Upcoming Event - " + event.getTitle());
         
@@ -54,6 +61,7 @@ public class EmailService {
 
     public void sendBookingConfirmation(String toEmail, String name, Event event, String bookingReference) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Reservation Confirmed: " + event.getTitle());
         
@@ -73,6 +81,7 @@ public class EmailService {
 
     public void sendCancellationNotice(String toEmail, String name, Event event) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("Reservation Cancelled: " + event.getTitle());
         

@@ -7,6 +7,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import com.example.model.Event;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public class EmailService {
     
@@ -16,13 +18,24 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    private void sendEmailAsync(SimpleMailMessage message, String context) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                mailSender.send(message);
+                System.out.println("Successfully sent email for: " + context);
+            } catch (Exception e) {
+                System.err.println("Failed to send async email (" + context + "): " + e.getMessage());
+            }
+        });
+    }
+
     public void sendEmail(String toEmail, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject(subject);
         message.setText(body);
-        mailSender.send(message);
+        sendEmailAsync(message, "General Email / OTP");
     }
 
     public void sendWelcomeEmail(String toEmail, String name) {
@@ -31,14 +44,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Welcome to Our App");
         message.setText("Hello " + name + ",\n\nWelcome to our Event Management App!\nWe're glad to have you on board.");
-
-        java.util.concurrent.CompletableFuture.runAsync(() -> {
-            try {
-                mailSender.send(message);
-            } catch (Exception e) {
-                System.err.println("Failed to send async welcome email: " + e.getMessage());
-            }
-        });
+        sendEmailAsync(message, "Welcome Email");
     }
 
     public void sendEventReminder(String toEmail, String name, Event event) {
@@ -55,8 +61,7 @@ public class EmailService {
                 + "Date & Time: " + event.getStartTime() + " to " + event.getEndTime() + "\n"
                 + "Location: " + locationStr + "\n\n"
                 + "We look forward to seeing you there!");
-
-        mailSender.send(message);
+        sendEmailAsync(message, "Event Reminder");
     }
 
     public void sendBookingConfirmation(String toEmail, String name, Event event, String bookingReference) {
@@ -75,8 +80,7 @@ public class EmailService {
                 + "Booking Reference: " + bookingReference + "\n\n"
                 + "Please show this reference or your QR code at the venue to pay cash and claim your pass.\n"
                 + "We look forward to seeing you there!");
-
-        mailSender.send(message);
+        sendEmailAsync(message, "Booking Confirmation");
     }
 
     public void sendCancellationNotice(String toEmail, String name, Event event) {
@@ -89,7 +93,6 @@ public class EmailService {
                 + "Your reservation for '" + event.getTitle() + "' has been successfully cancelled.\n\n"
                 + "If this was a mistake, you can always reserve a new ticket from the dashboard, provided tickets are still available.\n\n"
                 + "Thank you,\nEventHub Team");
-
-        mailSender.send(message);
+        sendEmailAsync(message, "Cancellation Notice");
     }
 }

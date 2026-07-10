@@ -1,6 +1,3 @@
 node_modules/
 target/
-dist/
-.idea/
-.vscode/
 .DS_Store

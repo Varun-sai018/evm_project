@@ -18,7 +18,7 @@ public class EvmApplication {
 	}
 
 	@Bean
-	CommandLineRunner seedAdminUser(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	CommandLineRunner seedAdminUser(UserRepository userRepository, PasswordEncoder passwordEncoder, com.example.repository.EventRepository eventRepository) {
 		return args -> {
 			User admin = userRepository.findByEmail("admin@example.com")
 					.orElseGet(() -> User.builder()
@@ -27,7 +27,21 @@ public class EvmApplication {
 							.build());
 
 			admin.setPassword(passwordEncoder.encode("admin123"));
+			admin.setRole("admin");
 			userRepository.save(admin);
+			
+			// Migrate existing events to APPROVED
+			java.util.List<com.example.model.Event> events = eventRepository.findAll();
+			boolean eventsUpdated = false;
+			for (com.example.model.Event event : events) {
+				if (event.getStatus() == null) {
+					event.setStatus(com.example.model.EventStatus.APPROVED);
+					eventsUpdated = true;
+				}
+			}
+			if (eventsUpdated) {
+				eventRepository.saveAll(events);
+			}
 		};
 	}
 }

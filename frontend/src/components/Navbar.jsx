@@ -9,7 +9,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const { currentUser, logout, isAdmin } = useAuth();
+  const { currentUser, logout, isAdmin, isOrganizer } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,9 +59,16 @@ const Navbar = () => {
               
               {currentUser ? (
                 <>
-                  <Link to={isAdmin ? "/organizer" : "/dashboard"} className="navbar-link">
-                    Dashboard
-                  </Link>
+                  {!isAdmin && (
+                    <Link to={isOrganizer ? "/organizer" : "/dashboard"} className="navbar-link">
+                      Dashboard
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link to="/admin/approvals" className="navbar-link">
+                      Approvals
+                    </Link>
+                  )}
                   
                   <div className="navbar-user">
                     <button 

@@ -42,6 +42,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/schedules/event/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );
 

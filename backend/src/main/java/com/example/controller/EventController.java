@@ -38,7 +38,7 @@ public class EventController {
         if (organizerId != null) {
             events = eventRepository.findByOrganizerId(organizerId, pageable);
         } else {
-            events = eventRepository.findAll(pageable);
+            events = eventRepository.findByStatus(com.example.model.EventStatus.APPROVED, pageable);
         }
         events.forEach(event -> {
             long activeBookings = bookingRepository.findByEvent(event).stream()

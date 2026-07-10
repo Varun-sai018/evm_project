@@ -72,7 +72,8 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
-    isAdmin: currentUser?.role === 'organizer', // Keeping the internal prop name isAdmin but mapping to 'organizer'
+    isAdmin: currentUser?.role === 'admin',
+    isOrganizer: currentUser?.role === 'organizer',
     isUser: currentUser?.role === 'user',
   };
 

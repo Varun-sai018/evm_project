@@ -95,7 +95,18 @@ const EventCard = ({
       
       <div className="event-card-content">
         <div className="event-card-header" style={{ alignItems: 'flex-start' }}>
-          <div>
+          <div style={{ width: '100%' }}>
+            {isAdmin && event.status && (
+              <div style={{ marginBottom: '8px' }}>
+                <span className={`badge`} style={{
+                  padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold',
+                  backgroundColor: event.status === 'APPROVED' ? '#d4edda' : (event.status === 'REJECTED' ? '#f8d7da' : '#fff3cd'),
+                  color: event.status === 'APPROVED' ? '#155724' : (event.status === 'REJECTED' ? '#721c24' : '#856404')
+                }}>
+                  {event.status}
+                </span>
+              </div>
+            )}
             <h3 className="event-card-title" style={{ cursor: 'pointer', color: 'var(--primary-color)' }} onClick={() => navigate(`/event/${event.id}`)}>
               {event.title}
             </h3>
@@ -151,6 +162,12 @@ const EventCard = ({
       </div>
       
       <p className="event-card-description">{event.description}</p>
+      
+      {isAdmin && event.status === 'REJECTED' && event.rejectionReason && (
+        <div style={{ padding: '10px', margin: '10px 0', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '6px', fontSize: '0.9rem' }}>
+          <strong>Rejection Reason:</strong> {event.rejectionReason}
+        </div>
+      )}
       
       <div className="event-card-meta">
         <div className="event-card-meta-item">

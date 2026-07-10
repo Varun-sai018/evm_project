@@ -44,6 +44,11 @@ public class Event {
     
     private String category;
     
+    @Enumerated(EnumType.STRING)
+    private EventStatus status = EventStatus.PENDING;
+    
+    private String rejectionReason;
+    
 	public Long getId() {
 		return id;
 	}
@@ -109,5 +114,17 @@ public class Event {
     }
     public void setCategory(String category) {
         this.category = category;
+    }
+    public EventStatus getStatus() {
+        return status;
+    }
+    public void setStatus(EventStatus status) {
+        this.status = status;
+    }
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 }

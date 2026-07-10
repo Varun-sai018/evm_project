@@ -192,4 +192,46 @@ export const getDashboardSummary = async (organizerId = null) => {
   }
 };
 
-// Removed redundant getEventAnalytics definition
+// Admin API Calls
+export const getPendingEvents = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/events/pending`, {
+      headers: getHeaders()
+    });
+    checkResponse(response);
+    const data = await response.json();
+    return data.content !== undefined ? data.content : data;
+  } catch (error) {
+    console.error('Error fetching pending events:', error);
+    throw error;
+  }
+};
+
+export const approveEvent = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/events/${id}/approve`, {
+      method: 'PUT',
+      headers: getHeaders()
+    });
+    checkResponse(response);
+    return await response.json();
+  } catch (error) {
+    console.error(`Error approving event ${id}:`, error);
+    throw error;
+  }
+};
+
+export const rejectEvent = async (id, reason) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/events/${id}/reject`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ reason })
+    });
+    checkResponse(response);
+    return await response.json();
+  } catch (error) {
+    console.error(`Error rejecting event ${id}:`, error);
+    throw error;
+  }
+};

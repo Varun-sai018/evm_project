@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminApprovals from './pages/AdminApprovals';
 import UserDashboard from './pages/UserDashboard';
 import AnalyticsPage from './pages/AnalyticsPage';
 import EventDetailsPage from './pages/EventDetailsPage';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/organizer" element={<ProtectedRoute role="organizer"><AdminDashboard /></ProtectedRoute>} />
             <Route path="/organizer/analytics/:eventId" element={<ProtectedRoute role="organizer"><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="/admin/approvals" element={<ProtectedRoute role="admin"><AdminApprovals /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute role="user"><UserDashboard /></ProtectedRoute>} />
             <Route path="/event/:id" element={<EventDetailsPage />} />
           </Routes>
@@ -58,10 +60,10 @@ function ProtectedRoute({ children, role }) {
   
   if (userRole !== role) {
     // Prevent infinite redirect if we're already trying to go to the default route
-    if (role === 'user' && userRole !== 'organizer') {
+    if (role === 'user' && userRole !== 'organizer' && userRole !== 'admin') {
       return children;
     }
-    return <Navigate to={userRole === 'organizer' ? '/organizer' : '/dashboard'} replace />;
+    return <Navigate to={userRole === 'admin' ? '/admin/approvals' : (userRole === 'organizer' ? '/organizer' : '/dashboard')} replace />;
   }
   
   return children;
